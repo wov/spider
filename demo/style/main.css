@@ -1,0 +1,93 @@
+:root{
+    --border-color : #979797;
+    --main-bg : #69AE6B;
+    --pure-black : #000;
+    --pure-red: #f00;
+
+    --card-bg: #fff;
+}
+
+
+html,body{
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+@font-face {font-family: "GeoSlab703 Md BT"; 
+    src: url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.eot");
+    src: url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.eot?#iefix") format("embedded-opentype"),
+    url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.woff2") format("woff2"), 
+    url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.woff") format("woff"),
+    url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.ttf") format("truetype"),
+    url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.svg#GeoSlab703 Md BT") format("svg"); 
+}
+
+
+html{ 
+    background-color: var(--main-bg);
+    font-family: "GeoSlab703 Md BT";
+}
+
+body{
+    background-image: radial-gradient(50% -100%, rgba(255,255,255,0.2) 0%, rgba(232,232,232,0.2) 32%, rgba(0,0,0,0.2) 100%);
+}
+
+
+
+
+/* TODO: 这里需要改掉绝对尺寸 */
+.card{
+    /* width: 70px;
+    height: 100px; */
+    border-radius: 3px;
+
+    display: inline-block;
+    margin: 2px;
+
+    background-color: var(--card-bg);
+    vertical-align: top;
+
+    aspect-ratio: 7 / 10;
+    width: calc(10vw - 2px);
+    border: .5px solid var(--border-color);
+
+    position: relative;
+
+
+
+}
+
+.card[data-suit="spade"],.card[data-suit="club"]{
+    color: var(--pure-black);
+}
+
+.card[data-suit="heart"],.card[data-suit="dianmond"]{
+    color: var(--pure-red);
+}
+
+
+.card .value{
+    width: 27%;
+    height: 29%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+}
+
+.card img{
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    vertical-align: top;
+}
+
+
+.card .suit{
+    width: 27%;
+    height: 20%;
+    position: absolute;
+    top: 20px;
+    left: 2px;
+}
