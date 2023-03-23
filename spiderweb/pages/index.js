@@ -5,6 +5,8 @@ import styles from '@/styles/Home.module.css'
 import { useState } from 'react';
 
 
+
+
 export default function Home() {
   const names = ['Ada Lovelace', 'Grace Hopper', 'Margaret Hamilton'];
 
@@ -15,16 +17,18 @@ export default function Home() {
   }
 
 
-  function Card(){
+  function Card(type,vlaue){
+
+
     return  <div className={styles.card} >
-              <div className="front">
-                  <div className="value">
+              <div className={styles.front}>
+                  <div className={styles.value}>
                       <img src="./svg/A.svg"></img>
                   </div>
-                  <div className="suit">
+                  <div className={styles.suit}>
                       <img src="./svg/spade.svg"></img>
                   </div>
-                  <div className="content">
+                  <div className={styles.content}>
                       <img src="./svg/spade_A_content.svg" />
                   </div>
               </div>
