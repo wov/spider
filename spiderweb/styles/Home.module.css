@@ -11,9 +11,10 @@
   position: absolute;
   display: block;
   width: 100%;
-  height: 100vh;
+  min-height: -webkit-fill-available;
   top: 0;
   left: 0;
+
   background: radial-gradient(circle at top center, rgba(255,255,255,0.2) 0%, rgba(232,232,232,0.2) 32%, rgba(0,0,0,0.2) 100%);
 
   /* 空出遮挡区域 */
@@ -21,7 +22,7 @@
     safe-area-inset-bottom,
     20px
   ) env(safe-area-inset-left, 20px);
-
+  box-sizing: border-box;
 }
 
 
@@ -32,6 +33,8 @@
 
   display: flex;
   flex-direction: column;
+
+
 }
 
 .cardsContainer{
@@ -50,6 +53,111 @@
   border: none;
   font-family: inherit;
 }
+
+
+/* TODO: 这里需要改掉绝对尺寸 */
+.card{
+  /* width: 70px;
+  height: 100px; */
+
+  display: inline-block;
+  margin: 2px;
+
+  vertical-align: top;
+
+  aspect-ratio: 7 / 10;
+  width: calc(10vw - 2px);
+
+  position: relative;
+  backface-visibility: hidden;
+
+}
+
+.card[data-suit="spade"],.card[data-suit="club"]{
+  color: var(--pure-black);
+}
+
+.card[data-suit="heart"],.card[data-suit="dianmond"]{
+  color: var(--pure-red);
+}
+
+
+.card .front{
+  backface-visibility: hidden;
+  position: absolute;
+transform: perspective(400px) rotateY(0deg);
+  width: 100%;
+  height: 100%;
+  transition: 0.5s;
+
+  background-color: var(--card-bg);
+  border: .5px solid var(--border-color);
+  border-radius: 3px;
+
+
+}
+
+.card .back{
+  content: "";
+  position: absolute;
+  display: block;
+  width: 100%;
+  height: 100%;
+
+  left: 0;
+  top: 0;
+  background-image: url('/svg/back.svg');
+  background-size: contain;
+
+  backface-visibility: hidden;
+
+transform: perspective(400px) rotateY(179.9deg);
+
+  transition: 0.5s;
+
+}
+
+div.card:hover div.back{
+transform: perspective(400px) rotateY(0);
+}
+
+div.card:hover div.front{
+transform: perspective(400px) rotateY(179.9deg);
+}
+
+.card .value{
+  width: 27%;
+  height: 29%;
+  position: absolute;
+  top: 3%;
+  left: 3%;
+}
+
+.card img{
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  vertical-align: top;
+}
+
+
+.card .suit{
+  width: 27%;
+  height: 20%;
+  position: absolute;
+  top: 34%;
+  left: 3%;
+}
+
+.card .content{
+  width: 57%;
+  height: 64%;
+  position: absolute;
+  right: 6%;
+  bottom: 6%;
+}
+
+
 
 
 /* Enable hover only on non-touch devices */

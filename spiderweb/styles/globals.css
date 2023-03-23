@@ -9,7 +9,7 @@
   --card-bg: #fff;
 
   --active-font-color: #fff;
-  
+
 
   /* --max-width: 1100px;
   --border-radius: 12px;
@@ -101,14 +101,9 @@ body {
   background-color: var(--main-bg);
 }
 
+
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  /* background: radial-gradient(circle at top center, rgba(255,255,255,0.2) 0%, rgba(232,232,232,0.2) 32%, rgba(0,0,0,0.2) 100%); */
 }
 
 a {
