@@ -8,6 +8,28 @@ import { useState } from 'react';
 
 
 export default function Home() {
+
+  const cards = [{
+    value : 'A',
+    suit : 'spade'
+  },{
+    value : '2',
+    suit : 'heart'
+  },{
+    value : '3',
+    suit : 'club'
+  },{
+    value : 'J',
+    suit : 'club'
+  },{
+    value : 'K',
+    suit : 'heart'
+  },{
+    value : 'J',
+    suit : 'diamond'
+  }]
+
+
   const names = ['Ada Lovelace', 'Grace Hopper', 'Margaret Hamilton'];
 
   const [likes, setLikes] = useState(0);
@@ -17,22 +39,23 @@ export default function Home() {
   }
 
 
-  function Card(type,vlaue){
-
+  function Card(props){
 
     return  <div className={styles.card} >
               <div className={styles.front}>
                   <div className={styles.value}>
-                      <img src="./svg/A.svg"></img>
+                    <Image alt='' src={ (props.suit==='spade' || props.suit==='club') ? `./svg/${props.value}.svg` : `./svg/${props.value}_red.svg`} width={200} height={200}></Image>
                   </div>
                   <div className={styles.suit}>
-                      <img src="./svg/spade.svg"></img>
+                    <Image alt='' src={`./svg/${props.suit}.svg`} width={200} height={200}></Image>
                   </div>
                   <div className={styles.content}>
-                      <img src="./svg/spade_A_content.svg" />
+                    <Image alt='' src={`./svg/${props.suit}_${props.value}_content.svg`} width={200} height={200}></Image>
                   </div>
               </div>
-              <div className="back"></div>
+              <div className={styles.back}>
+                  <img src="./svg/back.svg" />
+              </div>
           </div>
   }
 
@@ -50,8 +73,8 @@ export default function Home() {
 
         <div className={styles.gameContainer}>
           <div className={styles.cardsContainer}>
-          {names.map((name) => (
-            <Card key={name}>{name}</Card>
+          {cards.map((card,card_index) => (
+            <Card key={`card_${card_index}`} value={card.value} suit={card.suit}></Card>
           ))}
 
           </div>
