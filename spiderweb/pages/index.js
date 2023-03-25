@@ -4,60 +4,74 @@ import Image from 'next/image'
 import styles from '@/styles/Home.module.css'
 import { useState } from 'react';
 
+function Card({card}){
 
+  const [position, setPosition] = useState({x:0,y:0});
+
+  function handleClick(){
+    position.x = '200px';
+    position.y = '300px';    
+  }
+
+
+
+
+  return  <div className={styles.card} 
+
+              style={{
+                left: position.x || '',
+                top: position.y || ''
+              }}
+              onClick={handleClick}
+            >
+            <div className={styles.front}>
+                <div className={styles.value}>
+                  <Image alt='' src={ (card.suit==='spade' || card.suit==='club') ? `./svg/${card.value}.svg` : `./svg/${card.value}_red.svg`} width={200} height={200}></Image>
+                </div>
+                <div className={styles.suit}>
+                  <Image alt='' src={`./svg/${card.suit}.svg`} width={200} height={200}></Image>
+                </div>
+                <div className={styles.content}>
+                  <Image alt='' src={`./svg/${card.suit}_${card.value}_content.svg`} width={200} height={200}></Image>
+                </div>
+            </div>
+            <div className={styles.back}>
+                <img src="./svg/back.svg" />
+            </div>
+        </div>
+}
 
 
 export default function Home() {
+  const values = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+  const suites = ['spade','heart','club','diamond','spade','heart','club','diamond'];
 
-  const cards = [{
-    value : 'A',
-    suit : 'spade'
-  },{
-    value : '2',
-    suit : 'heart'
-  },{
-    value : '3',
-    suit : 'club'
-  },{
-    value : 'J',
-    suit : 'club'
-  },{
-    value : 'K',
-    suit : 'heart'
-  },{
-    value : 'J',
-    suit : 'diamond'
-  }]
+  let cards = [];
+
+  suites.forEach( s => {
+    values.forEach( v => {
+      cards.push({value:v,suit:s});
+    })
+  })
+
+  cards = cards.map(value => ({ value, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ value }) => value)
+
+  const [positions, setPositions] = useState([Array(cards.length).fill({x:0,y:0})]);
 
 
-  const names = ['Ada Lovelace', 'Grace Hopper', 'Margaret Hamilton'];
 
-  const [likes, setLikes] = useState(0);
 
-  function handleClick() {
-    setLikes(likes + 1);
+  function test(){
+
+    positions[0] = {x:'100px',y:'100px'};
+
+    setPositions(positions)
+
+    // console.log(positions)
   }
 
-
-  function Card(props){
-
-    return  <div className={styles.card} >
-              <div className={styles.front}>
-                  <div className={styles.value}>
-                    <Image alt='' src={ (props.suit==='spade' || props.suit==='club') ? `./svg/${props.value}.svg` : `./svg/${props.value}_red.svg`} width={200} height={200}></Image>
-                  </div>
-                  <div className={styles.suit}>
-                    <Image alt='' src={`./svg/${props.suit}.svg`} width={200} height={200}></Image>
-                  </div>
-                  <div className={styles.content}>
-                    <Image alt='' src={`./svg/${props.suit}_${props.value}_content.svg`} width={200} height={200}></Image>
-                  </div>
-              </div>
-              <div className={styles.back}>
-                  <img src="./svg/back.svg" />
-              </div>
-          </div>
-  }
 
 
   return (
@@ -70,121 +84,19 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-
         <div className={styles.gameContainer}>
           <div className={styles.cardsContainer}>
-          {cards.map((card,card_index) => (
-            <Card key={`card_${card_index}`} value={card.value} suit={card.suit}></Card>
-          ))}
-
+          {cards.map((card,card_index) => {
+            const position = positions[card_index];
+           return  <Card key={`card_${card_index}`} card={card} positions={positions} cardindex={card_index}></Card>
+          })}
           </div>
           <div className={styles.controlContainer}>
-            <button>MENU</button>
+            <button onClick={test}>MENU</button>
           </div>
         </div>
 
-        {/* <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>pages/index.js</code>
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{' '}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
-        </div>
-
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
-          />
-          <div className={styles.thirteen}>
-            <Image
-              src="/thirteen.svg"
-              alt="13"
-              width={40}
-              height={31}
-              priority
-            />
-          </div>
-        </div>
-
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
-        </div> */}
+      
       </main>
     </>
   )

@@ -39,10 +39,11 @@
 
 .cardsContainer{
   flex: 1;
+  position: relative;
 }
 
 .controlContainer{
-  
+  position: relative;
 }
 
 .controlContainer button{
@@ -55,35 +56,35 @@
 
 /* TODO: 这里需要改掉绝对尺寸 */
 .card{
+  position: absolute;
+
+  bottom: 0;
+  left: 0;
+
+
   /* width: 70px;
   height: 100px; */
 
   display: inline-block;
-  margin: 2px;
+  /* margin: 2px; */
 
   vertical-align: top;
 
   aspect-ratio: 7 / 10;
   width: calc(10vw - 2px);
+  margin: 1px;
 
-  position: relative;
+  /* position: relative; */
   backface-visibility: hidden;
 
-}
-
-.card[data-suit="spade"],.card[data-suit="club"]{
-  color: var(--pure-black);
-}
-
-.card[data-suit="heart"],.card[data-suit="dianmond"]{
-  color: var(--pure-red);
+  transition: 0.5s;
 }
 
 
 .card .front{
   backface-visibility: hidden;
   position: absolute;
-  transform: perspective(400px) rotateY(0deg);
+  transform: perspective(400px) rotateY(179.9deg);
   width: 100%;
   height: 100%;
   transition: 0.5s;
@@ -106,20 +107,13 @@
   background-size: contain;
 
   backface-visibility: hidden;
-
-transform: perspective(400px) rotateY(179.9deg);
-
+  transform: perspective(400px) rotateY(0);
   transition: 0.5s;
-
 }
 
-div.card:hover div.back{
-transform: perspective(400px) rotateY(0);
-}
 
-div.card:hover div.front{
-transform: perspective(400px) rotateY(179.9deg);
-}
+
+
 
 .card .value{
   width: 27%;
