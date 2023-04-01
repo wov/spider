@@ -104,6 +104,24 @@ async function dealCards(cards) {
   }
 
 
+  function updateCursorPosition(row, column) {
+    const spider = document.getElementById("spider");
+    const silk = document.getElementById("silk");
+  
+    if (row === -1) {
+      spider.style.transform = `translate(-50%, -50%) translate(${column * 10 + 5}vw, 70vh)`;
+    } else {
+      spider.style.transform = `translate(-50%, -50%) translate(${column * 10 + 5}vw, ${row * 30}px)`;
+    }
+  
+    // 更新蜘蛛丝位置
+    silk.setAttribute("x1", `${column * 10 + 5}vw`);
+    silk.setAttribute("y1", "0");
+    silk.setAttribute("x2", `${column * 10 + 5}vw`);
+    silk.setAttribute("y2", `${row === -1 ? "70vh" : row * 30}px`);
+  }
+  
+
   function isCardSelectable(tableau, card) {
     // 1. 只有翻开的牌才有可能是可选的，扣合的牌必定不可选。
     if (!card.isFaceUp) {
@@ -273,6 +291,9 @@ async function dealCards(cards) {
     renderInitialCards(initialGameState);
     DataStore.setData("gameState", initialGameState);
     // 绘制初始UI，所有卡牌扣合且在暂存区
+
+    // 测试
+    updateCursorPosition(5,4)
   
     // 延迟发牌
     setTimeout(async () => {

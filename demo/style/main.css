@@ -167,3 +167,24 @@ div.card.face-down div.front{
     display: none;
 }
 
+
+#cursor {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1001;
+    top: 0;
+}
+
+#spider {
+    width: 8vw;
+    height: auto;
+}
+
+#silk-container{
+    pointer-events: none;
+    z-index: 1000;
+}
+
+#silk{
+    /* box-shadow: 0 2px 4px 0 rgba(0,0,0,0.50); */
+}

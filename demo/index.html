@@ -11,36 +11,26 @@
 <body>
     <!-- qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM -->
 
-
     <main id="main">
         <button onclick="initApp()">Initialize App</button>
-
         <div id="cardContainer">
-           
-        
          
         </div>
         <div class="controlContainer">
 
         </div>
+
+        <!-- 光标，这里是小蜘蛛 -->
+        <div id="cursor">
+            <img id="spider" src="svg/spider.svg" style="position: absolute; top: 0; transform: translate(-50%, -50%);" />
+        </div>
+
+        <!-- 蜘蛛丝 -->
+        <svg id="silk-container" style="width: 100%; height: 100%; position: absolute; top: 0;">
+            <line id="silk" x1="0" y1="0" x2="0" y2="0" stroke="rgba(255, 255, 255, 0.6)" stroke-width="2" />
+          </svg>
     </main>
 
-<!-- 
-    <div class="card" data-value="A" data-suit="spade">
-        <div class="front">
-            <div class="value">
-                <img src="./svg/A.svg"></img>
-            </div>
-            <div class="suit">
-                <img src="./svg/spade.svg"></img>
-            </div>
-            <div class="content">
-                <img src="./svg/spade_A_content.svg" />
-            </div>
-        </div>
-        <div class="back"></div>
-    </div>
- -->
 
 
     <script type="module">
