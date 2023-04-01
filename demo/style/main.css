@@ -178,6 +178,7 @@ div.card.face-down div.front{
 #spider {
     width: 8vw;
     height: auto;
+    transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 #silk-container{
@@ -186,5 +187,12 @@ div.card.face-down div.front{
 }
 
 #silk{
+    transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
     /* box-shadow: 0 2px 4px 0 rgba(0,0,0,0.50); */
+}
+
+
+.controlContainer{
+    position: absolute;
+    bottom: 0;
 }

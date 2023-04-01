@@ -6,7 +6,72 @@ const initialLeft = "0px";
 const initialTop = "80vh";
 
 let cardId = 0;
+let gameState;
 
+
+// 获取按钮元素
+const upButton = document.getElementById("upButton");
+const downButton = document.getElementById("downButton");
+const leftButton = document.getElementById("leftButton");
+const rightButton = document.getElementById("rightButton");
+
+// 初始化光标位置
+let cursorRow = -1;
+let cursorColumn = 0;
+
+
+// 为按钮添加事件监听器
+upButton.addEventListener("click", moveUp);
+downButton.addEventListener("click", moveDown);
+leftButton.addEventListener("click", moveLeft);
+rightButton.addEventListener("click", moveRight);
+
+// 处理函数
+function moveUp() {
+    if (cursorRow > -1) {
+      cursorRow--;
+    }
+    gameState = DataStore.getData("gameState");
+    updateCursorPosition(cursorRow, cursorColumn, gameState);
+  }
+  
+  function moveDown() {
+    if (cursorRow < getBottomRowInColumn(cursorColumn) - 1) {
+      cursorRow++;
+    }
+    gameState = DataStore.getData("gameState");
+    updateCursorPosition(cursorRow, cursorColumn, gameState);
+  }
+  
+  function moveLeft() {
+    if (cursorColumn > 0) {
+      cursorColumn--;
+    }
+    cursorRow = -1;
+    gameState = DataStore.getData("gameState");
+    updateCursorPosition(cursorRow, cursorColumn, gameState);
+  }
+  
+  function moveRight() {
+    if (cursorColumn < 9) {
+      cursorColumn++;
+    }
+    cursorRow = -1;
+    gameState = DataStore.getData("gameState");
+    updateCursorPosition(cursorRow, cursorColumn, gameState);
+  }
+  
+
+// 检查列中是否有可选卡牌
+function isSelectableCardInColumn(column) {
+  // 检查 gameState.tableau[column] 中的卡牌是否有可选的
+  // 返回 true 或 false
+}
+
+// 获取列中最下方的卡牌行
+function getBottomRowInColumn(column) {
+  // 返回 gameState.tableau[column] 中最下方卡牌的行
+}
 
 // update ui
 class UIUpdater extends Observer {
@@ -91,25 +156,39 @@ async function dealCards(cards) {
             resolve();
           }, 50);
         });
-
-        // 设置卡牌的 isSelectable 属性
+      }
+    }
+  
+    // 更新卡牌的 isSelectable 属性
+    for (let column of tableau) {
+      for (let card of column) {
         card.isSelectable = isCardSelectable(tableau, card);
       }
     }
   
-    return {
+    const gameState = {
       tableau,
       tempZone,
     };
+  
+    // 触发 gameStateInitialized 事件
+    document.dispatchEvent(new CustomEvent("gameStateInitialized", { detail: { gameState } }));
+  
+    return gameState;
   }
+  
 
+  function updateCursorPosition(row, column,gameState) {
 
-  function updateCursorPosition(row, column) {
+    console.log('updateCursorPosition',row, column,gameState)
+
     const spider = document.getElementById("spider");
     const silk = document.getElementById("silk");
   
+    const numCardsInColumn = gameState.tableau[column].length;
+  
     if (row === -1) {
-      spider.style.transform = `translate(-50%, -50%) translate(${column * 10 + 5}vw, 70vh)`;
+      spider.style.transform = `translate(-50%, -50%) translate(${column * 10 + 5}vw, ${(numCardsInColumn * 30) + 20}px)`;
     } else {
       spider.style.transform = `translate(-50%, -50%) translate(${column * 10 + 5}vw, ${row * 30}px)`;
     }
@@ -118,8 +197,11 @@ async function dealCards(cards) {
     silk.setAttribute("x1", `${column * 10 + 5}vw`);
     silk.setAttribute("y1", "0");
     silk.setAttribute("x2", `${column * 10 + 5}vw`);
-    silk.setAttribute("y2", `${row === -1 ? "70vh" : row * 30}px`);
+  
+    const y2Value = row === -1 ? `${(numCardsInColumn * 30) + 20}px` : `${row * 30}px`;
+    silk.setAttribute("y2", y2Value);
   }
+  
   
 
   function isCardSelectable(tableau, card) {
@@ -172,8 +254,6 @@ async function dealCards(cards) {
     }
   }
   
-  
-
   
   function renderCard(card) {
     const isRed = card.suit === "diamond" || card.suit === "heart";
@@ -270,6 +350,28 @@ async function dealCards(cards) {
       });
       
   }
+
+
+  async function initializeGameState() {
+    return new Promise((resolve) => {
+      // 创建2副牌，并洗牌。
+      const deck1 = createDeck();
+      const deck2 = createDeck();
+  
+      const twoDecks = deck1.concat(deck2);
+      shuffle(twoDecks);
+  
+      // 将所有卡牌放入暂存区
+      const initialGameState = {
+        tableau: Array(10).fill([]),
+        tempZone: twoDecks.map((card) => ({ ...card, inTempZone: true, isFaceUp: false })),
+      };
+      renderInitialCards(initialGameState);
+      DataStore.setData("gameState", initialGameState);
+      resolve(initialGameState);
+    });
+  }
+  
   
 
   export async function initApp() {
@@ -291,13 +393,21 @@ async function dealCards(cards) {
     renderInitialCards(initialGameState);
     DataStore.setData("gameState", initialGameState);
     // 绘制初始UI，所有卡牌扣合且在暂存区
-
-    // 测试
-    updateCursorPosition(5,4)
-  
-    // 延迟发牌
-    setTimeout(async () => {
-      await dealCards([...twoDecks]); // 使用解构来创建卡牌数组的副本
-    }, 3000);
+    await dealCards([...twoDecks]); // 使用解构来创建卡牌数组的副本
   }
+
+  document.addEventListener("gameStateInitialized", (event) => {
+
+    console.log(event)
+
+    // 设置光标到第一个有可选牌的列下方
+    for (let i = 0; i < 10; i++) {
+      if (isSelectableCardInColumn(i)) {
+        cursorColumn = i;
+        break;
+      }
+    }
+  
+    updateCursorPosition(cursorRow, cursorColumn, event.detail.gameState);
+  });
   
