@@ -36,10 +36,8 @@ class UIUpdater extends Observer {
         });
       }
     }
-  
     return deck;
   }
-  
   
   
 function shuffle(cards) {
