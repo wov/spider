@@ -5,15 +5,27 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spider Pocket Demo</title>
-
+    <!-- <script src="https://unpkg.com/css-doodle"></script> -->
     <link rel="stylesheet" href="./style/main.css">
-
 </head>
 <body>
-    
     <!-- qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM -->
 
 
+    <main id="main">
+        <button onclick="initApp()">Initialize App</button>
+
+        <div id="cardContainer">
+           
+        
+         
+        </div>
+        <div class="controlContainer">
+
+        </div>
+    </main>
+
+<!-- 
     <div class="card" data-value="A" data-suit="spade">
         <div class="front">
             <div class="value">
@@ -28,66 +40,13 @@
         </div>
         <div class="back"></div>
     </div>
+ -->
 
-    <div class="card" data-value="A" data-suit="spade">
-        <div class="front">
-            <div class="value">
-                <img src="./svg/2.svg"></img>
-            </div>
-            <div class="suit">
-                <img src="./svg/spade.svg"></img>
-            </div>
-            <div class="content">
-                <img src="./svg/spade_2_content.svg" />
-            </div>
-        </div>
-        <div class="back"></div>
-    </div>
 
-    <div class="card" data-value="Q" data-suit="heart">
-        <div class="front">
-            <div class="value">
-                <img src="./svg/Q_red.svg"></img>
-            </div>
-            <div class="suit">
-                <img src="./svg/heart.svg"></img>
-            </div>
-            <div class="content">
-                <img src="./svg/heart_Q_content.svg" />
-            </div>
-        </div>
-        <div class="back"></div>
-    </div>
-
-    <div class="card" data-value="A" data-suit="club">
-        <div class="front">
-            <div class="value">
-                <img src="./svg/K.svg"></img>
-            </div>
-            <div class="suit">
-                <img src="./svg/club.svg"></img>
-            </div>
-            <div class="content">
-                <img src="./svg/club_K_content.svg" />
-            </div>
-        </div>
-        <div class="back"></div>
-    </div>
-
-    <div class="card" data-value="A" data-suit="heart">
-        <div class="front">
-            <div class="value">
-                <img src="./svg/10_red.svg"></img>
-            </div>
-            <div class="suit">
-                <img src="./svg/heart.svg"></img>
-            </div>
-            <div class="content">
-                <img src="./svg/heart_10_content.svg" />
-            </div>
-        </div>
-        <div class="back"></div>
-    </div>
-
+    <script type="module">
+        import { initApp } from './script/main.js';
+        window.initApp = initApp;
+    </script>
+  
 </body>
 </html>

@@ -14,8 +14,6 @@ function Card({card}){
   }
 
 
-
-
   return  <div className={styles.card} 
 
               style={{

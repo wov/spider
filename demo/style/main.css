@@ -16,7 +16,7 @@ html,body{
     margin: 0;
     padding: 0;
 }
-
+/* 
 @font-face {font-family: "GeoSlab703 Md BT"; 
     src: url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.eot");
     src: url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.eot?#iefix") format("embedded-opentype"),
@@ -24,47 +24,61 @@ html,body{
     url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.woff") format("woff"),
     url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.ttf") format("truetype"),
     url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.svg#GeoSlab703 Md BT") format("svg"); 
-}
+} */
 
 
-html{ 
+html{
     background-color: var(--main-bg);
+    /* background-image: url('/image/bg.jpg'); */
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
     font-family: "GeoSlab703 Md BT";
 }
 
-body{
-    background-image: radial-gradient(50% -100%, rgba(255,255,255,0.2) 0%, rgba(232,232,232,0.2) 32%, rgba(0,0,0,0.2) 100%);
+
+main{
+    position: absolute;
+    display: block;
+    width: 100%;
+    min-height: -webkit-fill-available;
+    top: 0;
+    left: 0;
+  
+    background: radial-gradient(circle at top center, rgba(255,255,255,0.2) 0%, rgba(232,232,232,0.2) 32%, rgba(0,0,0,0.2) 100%);
+    /* 空出遮挡区域 */
+    padding: env(safe-area-inset-top, 20px) env(safe-area-inset-right, 20px) env(
+        safe-area-inset-bottom,
+        20px
+    ) env(safe-area-inset-left, 20px);
+    box-sizing: border-box;
 }
 
+css-doodle {
+    width: 80vmin;
+    height: 40vmin;
+    border-radius: 10vmin;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+  
 
 
 
 /* TODO: 这里需要改掉绝对尺寸 */
 .card{
-    /* width: 70px;
-    height: 100px; */
-
     display: inline-block;
-    margin: 2px;
+    margin: 1px;
 
     vertical-align: top;
 
     aspect-ratio: 7 / 10;
-    width: calc(10vw - 2px);
+    width: calc(10vw - 1px);
 
-    position: relative;
+    position: absolute;
     backface-visibility: hidden;
 
+    transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
-
-.card[data-suit="spade"],.card[data-suit="club"]{
-    color: var(--pure-black);
-}
-
-.card[data-suit="heart"],.card[data-suit="dianmond"]{
-    color: var(--pure-red);
-}
-
 
 .card .front{
     backface-visibility: hidden;
@@ -73,12 +87,9 @@ body{
     width: 100%;
     height: 100%;
     transition: 0.5s;
-
     background-color: var(--card-bg);
     border: .5px solid var(--border-color);
     border-radius: 3px;
-
-
 }
 
 .card .back{
@@ -97,15 +108,17 @@ body{
 
 	transform: perspective(400px) rotateY(179.9deg);
 
-    transition: 0.5s;
+    /* transition: 0.5s; */
 
+    transition: transform 0.5s;
+    transform-style: preserve-3d;
 }
 
-div.card:hover div.back{
+div.card.face-down div.back{
 	transform: perspective(400px) rotateY(0);
 }
 
-div.card:hover div.front{
+div.card.face-down div.front{
 	transform: perspective(400px) rotateY(179.9deg);
 }
 
@@ -139,5 +152,18 @@ div.card:hover div.front{
     position: absolute;
     right: 6%;
     bottom: 6%;
+}
+
+/* 默认不可选 */
+.card.face-up:after{
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+}
+
+.card.face-up.selectable::after{
+    display: none;
 }
 

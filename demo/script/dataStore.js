@@ -1,0 +1,33 @@
+// dataStore.js
+class DataStore {
+    constructor() {
+      this.data = {};
+      this.observers = new Set();
+    }
+  
+    addObserver(observer) {
+      this.observers.add(observer);
+    }
+  
+    removeObserver(observer) {
+      this.observers.delete(observer);
+    }
+  
+    setData(key, value) {
+      this.data[key] = value;
+      this.notifyObservers();
+    }
+  
+    getData(key) {
+      return this.data[key];
+    }
+  
+    notifyObservers() {
+      for (const observer of this.observers) {
+        observer.update(this.data);
+      }
+    }
+  }
+  
+  export default new DataStore();
+  
