@@ -76,7 +76,6 @@ function moveCursor(direction) {
   updateCursorPosition(cursorRow, cursorColumn, gameState);
   DataStore.setData("gameState", gameState);
 }
-
   
   function moveLeft() {
     if (cursorColumn > 0) {
@@ -271,41 +270,49 @@ async function dealCards(cards) {
   
   
 
-  function isCardSelectable(tableau, card) {
-    // 1. 只有翻开的牌才有可能是可选的，扣合的牌必定不可选。
-    if (!card.isFaceUp) {
+ function isCardSelectable(tableau, card) {
+  // 1. 只有翻开的牌才有可能是可选的，扣合的牌必定不可选。
+  if (!card.isFaceUp || card.isSelected) {
+    return false;
+  }
+
+  const column = tableau.find((col) => col.some((c) => c.id === card.id));
+  const cardIndex = column.findIndex((c) => c.id === card.id);
+
+  // 检查其他列中是否有选中的卡牌
+  for (const otherColumn of tableau) {
+    if (otherColumn !== column && otherColumn.some((c) => c.isSelected)) {
       return false;
     }
-  
-    const column = tableau.find((col) => col.some((c) => c.id === card.id));
-    const cardIndex = column.findIndex((c) => c.id === card.id);
-  
-    // 2. 如果被其他牌压住，并且这个牌不是同花的，则这个牌就不可选。
-    // 如果是同花的，但是压住它的牌没有比他小1 则也不可选。
-    if (cardIndex < column.length - 1) {
-      const cardOnTop = column[cardIndex + 1];
-      if (cardOnTop.suit !== card.suit || cardValue(cardOnTop.rank) !== cardValue(card.rank) - 1) {
-        return false;
-      }
-    }
-  
-    // 3. 如果没有空列的时候，当其他列最上方且翻开的没有比他大“1”，则不可选。
-    // 如果有空列的时候则可选。
-    const hasEmptyColumn = tableau.some((col) => col.length === 0);
-    if (!hasEmptyColumn) {
-      const otherColumns = tableau.filter((col) => !col.some((c) => c.id === card.id));
-      const noGreaterCard = otherColumns.every((col) => {
-        const topCard = col[col.length - 1];
-        return !topCard.isFaceUp || cardValue(topCard.rank) !== cardValue(card.rank) + 1;
-      });
-      if (noGreaterCard) {
-        return false;
-      }
-    }
-  
-    return true;
   }
-  
+
+  // 2. 如果被其他牌压住，并且这个牌不是同花的，则这个牌就不可选。
+  // 如果是同花的，但是压住它的牌没有比他小1 则也不可选。
+  if (cardIndex < column.length - 1) {
+    const cardOnTop = column[cardIndex + 1];
+    if (cardOnTop.suit !== card.suit || cardValue(cardOnTop.rank) !== cardValue(card.rank) - 1) {
+      return false;
+    }
+  }
+
+  // 3. 如果没有空列的时候，当其他列最上方且翻开的没有比他大“1”，则不可选。
+  // 如果有空列的时候则可选。
+  const hasEmptyColumn = tableau.some((col) => col.length === 0);
+  if (!hasEmptyColumn) {
+    const otherColumns = tableau.filter((col) => !col.some((c) => c.id === card.id));
+    const noGreaterCard = otherColumns.every((col) => {
+      const topCard = col[col.length - 1];
+      return !topCard.isFaceUp || cardValue(topCard.rank) !== cardValue(card.rank) + 1;
+    });
+    if (noGreaterCard) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
   // 辅助函数，将卡牌等级转换为数字，以便于比较大小
   function cardValue(rank) {
     if (rank === "A") {

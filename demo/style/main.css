@@ -167,7 +167,8 @@ div.card.face-down div.front{
     background-color: rgba(255, 255, 255, 0.7);
 }
 
-.card.face-up.selectable::after{
+.card.face-up.selectable::after,
+.card.face-up.selected::after{
     display: none;
 }
 
