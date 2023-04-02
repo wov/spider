@@ -45,21 +45,57 @@ function moveUp() {
   
   function moveLeft() {
     if (cursorColumn > 0) {
-      cursorColumn--;
+        cursorColumn--;
+    } else {
+        cursorColumn = 9;
     }
-    cursorRow = -1;
+
     gameState = DataStore.getData("gameState");
+    const tableau = gameState.tableau;
+
+    while (!columnHasSelectableCard(tableau, cursorColumn)) {
+        cursorColumn--;
+        if (cursorColumn < 0) {
+            cursorColumn = 9;
+        }
+    }
+
+    cursorRow = -1;
     updateCursorPosition(cursorRow, cursorColumn, gameState);
-  }
-  
-  function moveRight() {
+}
+
+function moveRight() {
     if (cursorColumn < 9) {
-      cursorColumn++;
+        cursorColumn++;
+    } else {
+        cursorColumn = 0;
     }
-    cursorRow = -1;
+
     gameState = DataStore.getData("gameState");
+    const tableau = gameState.tableau;
+
+    while (!columnHasSelectableCard(tableau, cursorColumn)) {
+        cursorColumn++;
+        if (cursorColumn > 9) {
+            cursorColumn = 0;
+        }
+    }
+
+    cursorRow = -1;
     updateCursorPosition(cursorRow, cursorColumn, gameState);
-  }
+}
+
+
+function columnHasSelectableCard(tableau, columnIndex) {
+    const column = tableau[columnIndex];
+    for (const card of column) {
+        if (isCardSelectable(tableau, card)) {
+            return true;
+        }
+    }
+    return false;
+}
+
   
 
 // 检查列中是否有可选卡牌
@@ -395,17 +431,21 @@ async function dealCards(cards) {
   }
 
   document.addEventListener("gameStateInitialized", (event) => {
-
-    console.log(event)
-
     // 设置光标到第一个有可选牌的列下方
+    const tableau = event.detail.gameState.tableau;
+    let foundSelectableColumn = false;
     for (let i = 0; i < 10; i++) {
-      if (isSelectableCardInColumn(i)) {
-        cursorColumn = i;
-        break;
-      }
+        if (columnHasSelectableCard(tableau, i)) {
+            cursorColumn = i;
+            foundSelectableColumn = true;
+            break;
+        }
     }
-  
+
+    // 如果没有可选牌的列，则将光标设置为第一列下方
+    if (!foundSelectableColumn) {
+        cursorColumn = 0;
+    }
+
     updateCursorPosition(cursorRow, cursorColumn, event.detail.gameState);
-  });
-  
+});
