@@ -181,14 +181,12 @@ div.card.face-down div.front{
     transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-#silk-container{
+#silk{
     pointer-events: none;
     z-index: 1000;
-}
-
-#silk{
+    top: 0;
+    height: 0;
     transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-    /* box-shadow: 0 2px 4px 0 rgba(0,0,0,0.50); */
 }
 
 
@@ -196,3 +194,4 @@ div.card.face-down div.front{
     position: absolute;
     bottom: 0;
 }
+

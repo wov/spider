@@ -178,10 +178,9 @@ async function dealCards(cards) {
   }
   
 
-  function updateCursorPosition(row, column,gameState) {
-
-    console.log('updateCursorPosition',row, column,gameState)
-
+  function updateCursorPosition(row, column, gameState) {
+    console.log("updateCursorPosition", row, column, gameState);
+  
     const spider = document.getElementById("spider");
     const silk = document.getElementById("silk");
   
@@ -194,13 +193,12 @@ async function dealCards(cards) {
     }
   
     // 更新蜘蛛丝位置
-    silk.setAttribute("x1", `${column * 10 + 5}vw`);
-    silk.setAttribute("y1", "0");
-    silk.setAttribute("x2", `${column * 10 + 5}vw`);
-  
+    const xValue = `${column * 10 + 5}vw`;
     const y2Value = row === -1 ? `${(numCardsInColumn * 30) + 20}px` : `${row * 30}px`;
-    silk.setAttribute("y2", y2Value);
-  }
+  
+    silk.style.left = xValue;
+    silk.style.height = y2Value;  
+ }
   
   
 
