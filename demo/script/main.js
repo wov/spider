@@ -15,6 +15,11 @@ const downButton = document.getElementById("downButton");
 const leftButton = document.getElementById("leftButton");
 const rightButton = document.getElementById("rightButton");
 
+const confirmMoveButton = document.getElementById("confirmMove");
+const cancelMoveButton = document.getElementById("cancelMove");
+
+
+
 // 初始化光标位置
 let cursorRow = -1;
 let cursorColumn = 0;
@@ -26,8 +31,13 @@ let selectedCard = null;
 upButton.addEventListener("click", () => moveCursor('up'));
 downButton.addEventListener("click", () => moveCursor('down'));
 
-leftButton.addEventListener("click", moveLeft);
-rightButton.addEventListener("click", moveRight);
+leftButton.addEventListener("click", () => moveCursorHorizontal('left'));
+rightButton.addEventListener("click",  () => moveCursorHorizontal('right'));
+
+confirmMoveButton.addEventListener("click", confirmMove);
+cancelMoveButton.addEventListener("click", cancelMove);
+
+
 
 // 处理函数
 function moveCursor(direction) {
@@ -73,51 +83,96 @@ function moveCursor(direction) {
     }
   }
 
+  // 更新游标位置后，请确保更新卡牌的可移动到状态
+  updateMovableToCards(gameState.tableau, selectedCard);
   updateCursorPosition(cursorRow, cursorColumn, gameState);
   DataStore.setData("gameState", gameState);
 }
   
-  function moveLeft() {
-    if (cursorColumn > 0) {
-        cursorColumn--;
-    } else {
+function moveCursorHorizontal(direction) {
+  const delta = direction === "left" ? -1 : 1;
+  let newCursorColumn = cursorColumn + delta;
+
+  gameState = DataStore.getData("gameState");
+  const tableau = gameState.tableau;
+
+  // 确保新的光标列在有效范围内
+  if (newCursorColumn < 0) {
+    newCursorColumn = 9;
+  } else if (newCursorColumn > 9) {
+    newCursorColumn = 0;
+  }
+
+  if (selectedCard) {
+    // 如果选中了卡牌
+    let counter = 0;
+    let foundValidMove = false;
+
+    // 寻找可以移动到的列
+    while (!foundValidMove && counter < 10) {
+      const targetColumn = tableau[newCursorColumn];
+      const topCard = targetColumn[targetColumn.length - 1];
+
+      // 检查顶部卡牌是否比选中卡牌大1
+      if (topCard && cardValue(topCard.rank) === cardValue(selectedCard.rank) + 1) {
+        foundValidMove = true;
+      } else {
+        newCursorColumn += delta;
+        if (newCursorColumn < 0) {
+          newCursorColumn = 9;
+        } else if (newCursorColumn > 9) {
+          newCursorColumn = 0;
+        }
+      }
+
+      counter++;
+    }
+
+    if (foundValidMove) {
+      cursorColumn = newCursorColumn;
+      previewMove(cursorRow, cursorColumn, gameState); // 更新预览移动
+    }
+  } else {
+    // 如果没有选中卡牌，直接移动光标
+    cursorColumn = newCursorColumn;
+
+    // 寻找可选卡牌
+    let counter = 0;
+    while (!columnHasSelectableCard(tableau, cursorColumn) && counter < 10) {
+      cursorColumn += delta;
+      if (cursorColumn < 0) {
         cursorColumn = 9;
-    }
-
-    gameState = DataStore.getData("gameState");
-    const tableau = gameState.tableau;
-
-    while (!columnHasSelectableCard(tableau, cursorColumn)) {
-        cursorColumn--;
-        if (cursorColumn < 0) {
-            cursorColumn = 9;
-        }
-    }
-
-    cursorRow = -1;
-    updateCursorPosition(cursorRow, cursorColumn, gameState);
-}
-
-function moveRight() {
-    if (cursorColumn < 9) {
-        cursorColumn++;
-    } else {
+      } else if (cursorColumn > 9) {
         cursorColumn = 0;
+      }
+      counter++;
     }
 
-    gameState = DataStore.getData("gameState");
-    const tableau = gameState.tableau;
-
-    while (!columnHasSelectableCard(tableau, cursorColumn)) {
-        cursorColumn++;
-        if (cursorColumn > 9) {
-            cursorColumn = 0;
-        }
+    if (counter < 10) {
+      cursorRow = -1;
+      updateCursorPosition(cursorRow, cursorColumn, gameState);
     }
-
-    cursorRow = -1;
-    updateCursorPosition(cursorRow, cursorColumn, gameState);
+  }
 }
+
+
+
+function previewMove(row, column, gameState) {
+  console.log('previewMove')
+
+  // 更新光标位置
+  cursorRow = row;
+  cursorColumn = column;
+  updateCursorPosition(cursorRow, cursorColumn, gameState);
+
+  // 更新选中卡牌的预览位置
+  const cardElement = document.querySelector(`.card[data-id="${selectedCard.id}"]`);
+  if (cardElement) {
+    cardElement.style.left = `${column * 10}vw`;
+    cardElement.style.top = `${(gameState.tableau[column].length - 1) * 10}px`;
+  }
+}
+
 
 
 function columnHasSelectableCard(tableau, columnIndex) {
@@ -140,6 +195,65 @@ function getLastSelectableCardInColumn(columnIndex) {
   }
   return null;
 }
+
+function confirmMove() {
+  if (selectedCard) {
+    const originColumn = gameState.tableau.find((col) => col.some((c) => c.id === selectedCard.id));
+    const originIndex = originColumn.findIndex((c) => c.id === selectedCard.id);
+    const targetColumn = gameState.tableau[cursorColumn];
+
+    // 从原始列中移除选中的卡牌
+    originColumn.splice(originIndex, 1);
+
+    // 添加卡牌到目标列
+    targetColumn.push(selectedCard);
+
+    // 如果原始列顶部的卡牌是扣合的，翻开它
+    if (originColumn.length > 0) {
+      const topCard = originColumn[originColumn.length - 1];
+      if (!topCard.isFaceUp) {
+        topCard.isFaceUp = true;
+      }
+    }
+
+    // 取消选中的卡牌
+    selectedCard.isSelected = false;
+    selectedCard = null;
+
+    // 清除所有卡牌的 "isMovableTo" 属性
+    gameState.tableau.flat().forEach((card) => {
+      card.isMovableTo = false;
+    });
+
+    // 重新渲染卡牌
+    DataStore.setData("gameState", gameState);
+  }
+}
+
+function cancelMove() {
+  if (selectedCard) {
+    // 清除所有卡牌的 "isMovableTo" 属性
+    gameState.tableau.flat().forEach((card) => {
+      card.isMovableTo = false;
+    });
+
+    // 重新设置光标位置
+    cursorRow = -1;
+    cursorColumn = gameState.tableau.findIndex((col) => col.some((c) => c.id === selectedCard.id));
+
+    // 取消选中的卡牌
+    selectedCard.isSelected = false;
+    selectedCard = null;
+
+    // 更新光标位置
+    updateCursorPosition(cursorRow, cursorColumn, gameState);
+
+    // 重新渲染卡牌
+    DataStore.setData("gameState", gameState);
+  }
+}
+
+
 
 // update ui
 class UIUpdater extends Observer {
@@ -166,6 +280,7 @@ class UIUpdater extends Observer {
           isFaceUp: false, // 是否翻开
           isSelectable: false, // 是否可选
           isSelected: false, // 是否被选中
+          isMovableTo: false, // 是否可被移动到
         });
       }
     }
@@ -313,6 +428,33 @@ async function dealCards(cards) {
 }
 
 
+function updateMovableToCards(tableau, selectedCard) {
+  if (selectedCard) {
+    tableau.forEach((column) => {
+      if (!column.some((c) => c.id === selectedCard.id)) {
+        const topCard = column[column.length - 1];
+        if (
+          topCard &&
+          topCard.isFaceUp &&
+          cardValue(topCard.rank) === cardValue(selectedCard.rank) + 1
+        ) {
+          topCard.isMovableTo = true;
+        } else {
+          topCard.isMovableTo = false;
+        }
+      }
+    });
+  } else {
+    tableau.forEach((column) => {
+      const topCard = column[column.length - 1];
+      if (topCard) {
+        topCard.isMovableTo = false;
+      }
+    });
+  }
+}
+
+
   // 辅助函数，将卡牌等级转换为数字，以便于比较大小
   function cardValue(rank) {
     if (rank === "A") {
@@ -397,6 +539,9 @@ async function dealCards(cards) {
         cardElement.classList.toggle("selectable", card.isSelectable);  
 
         cardElement.classList.toggle("selected", card.isSelected);
+
+        // 更新卡牌的可移动到状态
+        cardElement.classList.toggle("movable-to", card.isMovableTo);
       });
     });
   
@@ -439,6 +584,7 @@ async function dealCards(cards) {
       const initialGameState = {
         tableau: Array(10).fill([]),
         tempZone: twoDecks.map((card) => ({ ...card, inTempZone: true, isFaceUp: false })),
+        previewMove: null 
       };
       renderInitialCards(initialGameState);
       DataStore.setData("gameState", initialGameState);
