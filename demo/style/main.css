@@ -80,6 +80,10 @@ css-doodle {
     transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
+.card.selected{
+    transform: scale(1.1);
+}
+
 .card .front{
     backface-visibility: hidden;
     position: absolute;

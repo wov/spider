@@ -19,29 +19,64 @@ const rightButton = document.getElementById("rightButton");
 let cursorRow = -1;
 let cursorColumn = 0;
 
+let selectedCard = null;
+
 
 // 为按钮添加事件监听器
-upButton.addEventListener("click", moveUp);
-downButton.addEventListener("click", moveDown);
+upButton.addEventListener("click", () => moveCursor('up'));
+downButton.addEventListener("click", () => moveCursor('down'));
+
 leftButton.addEventListener("click", moveLeft);
 rightButton.addEventListener("click", moveRight);
 
 // 处理函数
-function moveUp() {
-    if (cursorRow > -1) {
-      cursorRow--;
+function moveCursor(direction) {
+  gameState = DataStore.getData("gameState");
+
+  if (direction === "up") {
+    if (cursorRow === -1) {
+      selectedCard = getLastSelectableCardInColumn(cursorColumn);
+      cursorRow = gameState.tableau[cursorColumn].indexOf(selectedCard);
+      if (selectedCard) {
+        selectedCard.isSelected = true;
+      }
+    } else {
+      const nextRow = cursorRow - 1;
+      const nextCard = gameState.tableau[cursorColumn][nextRow];
+      if (nextCard && isCardSelectable(gameState.tableau, nextCard)) {
+        if (selectedCard) {
+          selectedCard.isSelected = false;
+        }
+        cursorRow = nextRow;
+        selectedCard = nextCard;
+        selectedCard.isSelected = true;
+      }
     }
-    gameState = DataStore.getData("gameState");
-    updateCursorPosition(cursorRow, cursorColumn, gameState);
-  }
-  
-  function moveDown() {
-    if (cursorRow < getBottomRowInColumn(cursorColumn) - 1) {
-      cursorRow++;
+  } else if (direction === "down") {
+    if (cursorRow < gameState.tableau[cursorColumn].length - 1) {
+      const nextRow = cursorRow + 1;
+      const nextCard = gameState.tableau[cursorColumn][nextRow];
+      if (nextCard && isCardSelectable(gameState.tableau, nextCard)) {
+        if (selectedCard) {
+          selectedCard.isSelected = false;
+        }
+        cursorRow = nextRow;
+        selectedCard = nextCard;
+        selectedCard.isSelected = true;
+      }
+    } else {
+      if (selectedCard) {
+        selectedCard.isSelected = false;
+      }
+      cursorRow = -1;
+      selectedCard = null;
     }
-    gameState = DataStore.getData("gameState");
-    updateCursorPosition(cursorRow, cursorColumn, gameState);
   }
+
+  updateCursorPosition(cursorRow, cursorColumn, gameState);
+  DataStore.setData("gameState", gameState);
+}
+
   
   function moveLeft() {
     if (cursorColumn > 0) {
@@ -96,17 +131,15 @@ function columnHasSelectableCard(tableau, columnIndex) {
     return false;
 }
 
-  
 
-// 检查列中是否有可选卡牌
-function isSelectableCardInColumn(column) {
-  // 检查 gameState.tableau[column] 中的卡牌是否有可选的
-  // 返回 true 或 false
-}
-
-// 获取列中最下方的卡牌行
-function getBottomRowInColumn(column) {
-  // 返回 gameState.tableau[column] 中最下方卡牌的行
+function getLastSelectableCardInColumn(columnIndex) {
+  const column = gameState.tableau[columnIndex];
+  for (let i = column.length - 1; i >= 0; i--) {
+    if (column[i].isSelectable) {
+      return column[i];
+    }
+  }
+  return null;
 }
 
 // update ui
