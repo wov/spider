@@ -72,7 +72,7 @@ css-doodle {
     vertical-align: top;
 
     aspect-ratio: 7 / 10;
-    width: calc(10vw - 1px);
+    width: calc(10vw - 3px);
 
     position: absolute;
     backface-visibility: hidden;
@@ -174,14 +174,14 @@ div.card.face-down div.front{
 }
 
 .card.movable-to{
-    animation: shake 0.3s ease-in-out 0s 1, shake 0s ease 3s infinite;
+    animation: breathe 5s ease-in-out infinite;
 }
 
 
 #cursor {
     position: absolute;
     pointer-events: none;
-    z-index: 1001;
+    z-index: 1002;
     top: 0;
 }
 
@@ -193,7 +193,7 @@ div.card.face-down div.front{
 
 #silk{
     pointer-events: none;
-    z-index: 1000;
+    z-index: 1001;
     top: 0;
     height: 0;
     transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
@@ -216,4 +216,15 @@ div.card.face-down div.front{
     70% { transform: translate(-1px, 1px) rotate(-1deg); }
     80% { transform: translate(1px, -1px) rotate(1deg); }
     90% { transform: translate(-1px, 1px) rotate(-1deg); }
+  }
+
+
+  /* 创建关键帧动画 */
+  @keyframes breathe {
+    0%, 100% {
+      box-shadow: 0 0 5px rgba(255, 255, 0, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 15px rgba(255, 255, 0, 1);
+    }
   }
