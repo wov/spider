@@ -145,8 +145,8 @@ function moveCursorHorizontal(direction) {
       const targetColumn = tableau[newCursorColumn];
       const topCard = targetColumn[targetColumn.length - 1];
 
-      // 检查顶部卡牌是否比选中卡牌大1
-      if (topCard && cardValue(topCard.rank) === cardValue(selectedCard.rank) + 1) {
+      // 如果目标列为空或顶部卡牌比选中卡牌大1，则允许移动
+      if (!topCard || cardValue(topCard.rank) === cardValue(selectedCard.rank) + 1) {
         foundValidMove = true;
       } else {
         newCursorColumn += delta;
