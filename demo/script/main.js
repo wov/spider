@@ -183,7 +183,6 @@ function moveCursorHorizontal(direction) {
 
 function previewMove(row, column, gameState) {
   console.log('previewMove')
-
   // 更新光标位置
   cursorRow = row;
   cursorColumn = column;
@@ -261,6 +260,9 @@ function confirmMove() {
     // 初始化光标位置
     initializeCursor(gameState);
 
+    // 更新卡牌被压住的状态
+    updateCardCoveredStatus(gameState);
+    
     // 重新渲染卡牌
     DataStore.setData("gameState", gameState);
   }
@@ -319,6 +321,7 @@ class UIUpdater extends Observer {
           isSelectable: false, // 是否可选
           isSelected: false, // 是否被选中
           isMovableTo: false, // 是否可被移动到
+          isCovered: false, // 是否被压住
         });
       }
     }
@@ -561,6 +564,14 @@ function updateMovableToCards(tableau, selectedCard) {
     return cardEl;
   }
     
+  function updateCardCoveredStatus(gameState) {
+    gameState.tableau.forEach((column) => {
+      column.forEach((card, cardIndex) => {
+        card.isCovered = cardIndex < column.length - 1;
+      });
+    });
+  }
+  
 
   function renderInitialCards(gameState) {
     const cardContainer = document.getElementById("cardContainer");
@@ -601,6 +612,9 @@ function updateMovableToCards(tableau, selectedCard) {
 
         // 更新卡牌的可移动到状态
         cardElement.classList.toggle("movable-to", card.isMovableTo);
+
+        // 根据卡牌的 isCovered 属性，添加或移除 'covered' 类名
+        cardElement.classList.toggle('covered', card.isCovered);
       });
     });
   
@@ -673,5 +687,11 @@ function updateMovableToCards(tableau, selectedCard) {
   }
 
   document.addEventListener("gameStateInitialized", (event) => {
-    initializeCursor(event.detail.gameState);
+    const gameState = event.detail.gameState;
+    
+    // 更新卡牌被压住的状态
+    updateCardCoveredStatus(gameState);
+    
+    initializeCursor(gameState);
   });
+  
