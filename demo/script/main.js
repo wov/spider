@@ -18,9 +18,6 @@ const rightButton = document.getElementById("rightButton");
 const confirmMoveButton = document.getElementById("confirmMove");
 const cancelMoveButton = document.getElementById("cancelMove");
 
-
-
-
 // 初始化光标位置
 let cursorRow = -1;
 let cursorColumn = 0;
@@ -66,10 +63,6 @@ document.addEventListener("keydown", (event) => {
       break;
   }
 });
-
-
-
-
 
 // 处理函数
 function moveCursor(direction) {
@@ -188,7 +181,6 @@ function moveCursorHorizontal(direction) {
 }
 
 
-
 function previewMove(row, column, gameState) {
   console.log('previewMove')
 
@@ -197,17 +189,24 @@ function previewMove(row, column, gameState) {
   cursorColumn = column;
   updateCursorPosition(cursorRow, cursorColumn, gameState);
 
-  // 更新选中卡牌的预览位置
-  const cardElement = document.querySelector(`.card[data-id="${selectedCard.id}"]`);
-  if (cardElement) {
-    // 1. 保持预览卡牌的 z-index 始终在上方
-    cardElement.style.zIndex = '1000';
+  // 更新选中卡牌及其下面的卡牌的预览位置
+  const fromColumnIndex = gameState.tableau.findIndex((col) => col.some((c) => c.isSelected));
+  const selectedCardIndex = gameState.tableau[fromColumnIndex].findIndex((card) => card.isSelected);
+  const movingCards = gameState.tableau[fromColumnIndex].slice(selectedCardIndex);
 
-    // 2. 更新卡牌位置以适应新列底部
-    cardElement.style.left = `${column * 10}vw`;
-    cardElement.style.top = `${(gameState.tableau[column].length) * 15}px`;
-  }
+  movingCards.forEach((card, index) => {
+    const cardElement = document.querySelector(`.card[data-id="${card.id}"]`);
+    if (cardElement) {
+      // 1. 保持预览卡牌的 z-index 始终在上方
+      cardElement.style.zIndex = '1000';
+
+      // 2. 更新卡牌位置以适应新列底部
+      cardElement.style.left = `${column * 10}vw`;
+      cardElement.style.top = `${(gameState.tableau[column].length + index) * 15}px`;
+    }
+  });
 }
+
 
 
 function columnHasSelectableCard(tableau, columnIndex) {
@@ -233,26 +232,25 @@ function getLastSelectableCardInColumn(columnIndex) {
 
 function confirmMove() {
   if (selectedCard) {
-    const originColumn = gameState.tableau.find((col) => col.some((c) => c.id === selectedCard.id));
-    const originIndex = originColumn.findIndex((c) => c.id === selectedCard.id);
-    const targetColumn = gameState.tableau[cursorColumn];
-
-    // 从原始列中移除选中的卡牌
-    originColumn.splice(originIndex, 1);
+    const fromColumnIndex = gameState.tableau.findIndex((col) => col.some((c) => c.isSelected));
+    const selectedCardIndex = gameState.tableau[fromColumnIndex].findIndex((card) => card.isSelected);
+    const movingCards = gameState.tableau[fromColumnIndex].splice(selectedCardIndex);
 
     // 添加卡牌到目标列
-    targetColumn.push(selectedCard);
+    gameState.tableau[cursorColumn].push(...movingCards);
 
     // 如果原始列顶部的卡牌是扣合的，翻开它
-    if (originColumn.length > 0) {
-      const topCard = originColumn[originColumn.length - 1];
+    if (gameState.tableau[fromColumnIndex].length > 0) {
+      const topCard = gameState.tableau[fromColumnIndex][gameState.tableau[fromColumnIndex].length - 1];
       if (!topCard.isFaceUp) {
         topCard.isFaceUp = true;
       }
     }
 
     // 取消选中的卡牌
-    selectedCard.isSelected = false;
+    movingCards.forEach((card) => {
+      card.isSelected = false;
+    });
     selectedCard = null;
 
     // 清除所有卡牌的 "isMovableTo" 属性
@@ -267,6 +265,7 @@ function confirmMove() {
     DataStore.setData("gameState", gameState);
   }
 }
+
 
 
 function cancelMove() {
@@ -559,12 +558,9 @@ function updateMovableToCards(tableau, selectedCard) {
     const cardEl = cardElement.querySelector(".card");
     cardEl.style.left = initialLeft;
     cardEl.style.top = initialTop;
-  
     return cardEl;
   }
-  
-  
-  
+    
 
   function renderInitialCards(gameState) {
     const cardContainer = document.getElementById("cardContainer");
@@ -645,9 +641,8 @@ function updateMovableToCards(tableau, selectedCard) {
   
       // 将所有卡牌放入暂存区
       const initialGameState = {
-        tableau: Array(10).fill([]),
-        tempZone: twoDecks.map((card) => ({ ...card, inTempZone: true, isFaceUp: false })),
-        previewMove: null 
+        tableau: Array(10).fill().map(() => []),
+        tempZone: twoDecks.map((card) => ({ ...card, inTempZone: true, isFaceUp: false }))
       };
       renderInitialCards(initialGameState);
       DataStore.setData("gameState", initialGameState);
@@ -655,8 +650,6 @@ function updateMovableToCards(tableau, selectedCard) {
     });
   }
   
-  
-
   export async function initApp() {
     const uiUpdater = new UIUpdater();
     DataStore.addObserver(uiUpdater);
