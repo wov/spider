@@ -210,7 +210,48 @@ div.card.face-down div.front{
 .controlContainer{
     position: absolute;
     bottom: 0;
+    width: 100%;
 }
+
+
+.controls{
+    position: absolute;
+    left: 30%;
+    bottom: 80px;
+    height: 150px;
+    width: 150px;
+}
+
+.controls > div{
+    position: absolute;
+    width: 33%;
+    height: 33%;
+    border: 1px solid red;
+}
+
+.controls .up{
+    left: 33%;
+    top: 0;
+}
+
+.controls .down{
+    left: 33%;
+    bottom: 0;
+}
+
+.controls .left{
+    left: 0;
+    top: 33%;
+}
+
+.controls .right{
+    right: 0;
+    top: 33%;
+}
+
+
+
+
 
 @keyframes shake {
     0%, 100% { transform: translate(0, 0) rotate(0deg); }

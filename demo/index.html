@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Spider Pocket Demo</title>
     <!-- <script src="https://unpkg.com/css-doodle"></script> -->
     <link rel="stylesheet" href="./style/main.css">
@@ -17,13 +17,16 @@
          
         </div>
         <div class="controlContainer">
-            <button id="upButton">上 &#8593;</button>
-            <button id="downButton">下 &#8595;</button>
-            <button id="leftButton">左 &#8592;</button>
-            <button id="rightButton">右 &#8594;</button>
-            <button id="confirmMove">确定 enter</button>
-            <button id="cancelMove">取消 esc</button>
 
+            <div class="controls">
+                <div class="up" id="upButton">上 &#8593;</div>
+                <div class="down" id="downButton">下 &#8595;</div>
+                <div class="left" id="leftButton">左 &#8592;</div>
+                <div class="right" id="rightButton">右 &#8594;</div>
+            </div>
+
+            <div id="confirmMove">确定 enter</div>
+            <div id="cancelMove">取消 esc</div>
             <div id="deal-cards" class="deal-cards-btn">发牌</div>
 
         </div>
