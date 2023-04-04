@@ -279,6 +279,9 @@ function confirmMove() {
     // 更新卡牌被压住的状态
     updateCardCoveredStatus(gameState);
     
+    const movedToRecycling = checkAndMoveSequencesToRecyclingZone(gameState);
+
+
     // 重新渲染卡牌
     DataStore.setData("gameState", gameState);
   }
@@ -352,71 +355,76 @@ function shuffle(cards) {
     }
 }
 
-
+// 第一次发牌，初始化游戏
 async function dealCards(cards) {
-    const tableau = []; // 游戏区的10列
-    const tempZone = []; // 暂存区
-    const numColumns = 10;
-  
-    // 初始化游戏区
-    for (let i = 0; i < numColumns; i++) {
-      tableau[i] = [];
-    }
-  
-    // 将剩余卡牌放入暂存区
-    while (cards.length > 0) {
-      const card = cards.pop();
-      card.inTempZone = true;
-      tempZone.push(card);
-    }
-  
-    // 发牌到游戏区
-    for (let j = 0; j < 6; j++) {
-      for (let i = 0; i < numColumns; i++) {
-        if (j === 5 && i >= 4) continue; // 只有前4列有6张牌
-        const card = tempZone.pop();
-        if (j === (i < 4 ? 5 : 4)) {
-          card.isFaceUp = true;
-        }
-        tableau[i].push(card);
-  
-        // 设置 gameState
-        const gameState = {
-          tableau,
-          tempZone,
-        };
-        DataStore.setData("gameState", gameState);
-  
-        // 等待 50 毫秒后，将卡牌从暂存区移到游戏区
-        await new Promise((resolve) => {
-          setTimeout(() => {
-            card.inTempZone = false;
-            card.processing = false;
-            DataStore.setData("gameState", gameState);
-            resolve();
-          }, 50);
-        });
-      }
-    }
-  
-    // 更新卡牌的 isSelectable 属性
-    for (let column of tableau) {
-      for (let card of column) {
-        card.isSelectable = isCardSelectable(tableau, card);
-      }
-    }
-  
-    const gameState = {
-      tableau,
-      tempZone,
-    };
-  
-    // 触发 gameStateInitialized 事件
-    document.dispatchEvent(new CustomEvent("gameStateInitialized", { detail: { gameState } }));
-  
-    return gameState;
+  const tableau = []; // 游戏区的10列
+  const tempZone = []; // 暂存区
+  const recyclingZone = []; // 回收区
+  const numColumns = 10;
+
+  // 初始化游戏区
+  for (let i = 0; i < numColumns; i++) {
+    tableau[i] = [];
   }
 
+  // 将剩余卡牌放入暂存区
+  while (cards.length > 0) {
+    const card = cards.pop();
+    card.inTempZone = true;
+    tempZone.push(card);
+  }
+
+  // 发牌到游戏区
+  for (let j = 0; j < 6; j++) {
+    for (let i = 0; i < numColumns; i++) {
+      if (j === 5 && i >= 4) continue; // 只有前4列有6张牌
+      const card = tempZone.pop();
+      if (j === (i < 4 ? 5 : 4)) {
+        card.isFaceUp = true;
+      }
+      tableau[i].push(card);
+
+      // 设置 gameState
+      const gameState = {
+        tableau,
+        tempZone,
+        recyclingZone,
+      };
+      DataStore.setData("gameState", gameState);
+
+      // 等待 50 毫秒后，将卡牌从暂存区移到游戏区
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          card.inTempZone = false;
+          card.processing = false;
+          DataStore.setData("gameState", gameState);
+          resolve();
+        }, 50);
+      });
+    }
+  }
+
+  // 更新卡牌的 isSelectable 属性
+  for (let column of tableau) {
+    for (let card of column) {
+      card.isSelectable = isCardSelectable(tableau, card);
+    }
+  }
+
+  const gameState = {
+    tableau,
+    tempZone,
+    recyclingZone,
+  };
+
+  // 触发 gameStateInitialized 事件
+  document.dispatchEvent(new CustomEvent("gameStateInitialized", { detail: { gameState } }));
+
+  return gameState;
+}
+
+
+  // 发牌
   async function dealCardsToTableau() {
     // 获取游戏状态
     const gameState = DataStore.getData("gameState");
@@ -433,6 +441,8 @@ async function dealCards(cards) {
   
       // 将卡牌添加到对应列的顶部
       gameState.tableau[i].push(card);
+
+      const movedToRecycling = checkAndMoveSequencesToRecyclingZone(gameState);
   
       // 更新游戏状态
       DataStore.setData("gameState", gameState);
@@ -446,34 +456,6 @@ async function dealCards(cards) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
   }
-  
-
-  // function dealCardsToTableau() {
-  //   // 获取游戏状态
-  //   const gameState = DataStore.getData("gameState");
-  
-  //   // 将暂存区中的前 10 张牌分发到游戏区的每一列
-  //   for (let i = 0; i < 10; i++) {
-  //     if (gameState.tempZone.length === 0) {
-  //       break;
-  //     }
-  //     const card = gameState.tempZone.pop();
-  
-  //     // 翻开卡牌
-  //     card.isFaceUp = true;
-  
-  //     // 将卡牌添加到对应列的顶部
-  //     gameState.tableau[i].push(card);
-  //   }
-
-  //   // 更新卡牌被压住的状态
-  //   updateCardCoveredStatus(gameState);
-  //   initializeCursor(gameState);
-
-  //   // 更新游戏状态
-  //   DataStore.setData("gameState", gameState);
-  // }
-  
   
 
   function updateCursorPosition(row, column, gameState) {
@@ -736,28 +718,97 @@ function updateMovableToCards(tableau, selectedCard) {
         cardElement.classList.toggle("face-down", !card.isFaceUp);
       });
       
+
+      // 渲染回收区的卡牌
+      gameState.recyclingZone.forEach((card, cardIndex) => {
+        const cardElement = cards.find((el) => el.dataset.id === card.id.toString());
+
+        if (!cardElement) {
+          console.error("Card element not found:", card);
+          return;
+        }
+
+        // 计算卡牌位置
+        const recyclingZoneLeft = 80; // 可根据需要修改回收区距离左侧的百分比
+        const recyclingZoneTop = 80; // 可根据需要修改回收区距离顶部的百分比
+        const recyclingZoneSpacing = 1; // 可根据需要修改回收区卡牌间距的像素值
+
+        cardElement.style.left = `${recyclingZoneLeft}vw`;
+        cardElement.style.top = `${recyclingZoneTop + cardIndex * recyclingZoneSpacing}vh`;
+        cardElement.style.zIndex = `${1000 + cardIndex}`; // 设置较高的 z-index 以确保回收区卡牌显示在顶部
+
+        // 更新卡牌的翻开状态
+        cardElement.classList.toggle("face-up", card.isFaceUp);
+        cardElement.classList.toggle("face-down", !card.isFaceUp);
+
+        // 移除回收区卡牌的可选、选中和可移动到状态
+        cardElement.classList.remove("selectable", "selected", "movable-to");
+      });
+
   }
 
-
-  async function initializeGameState() {
-    return new Promise((resolve) => {
-      // 创建2副牌，并洗牌。
-      const deck1 = createDeck();
-      const deck2 = createDeck();
+  function checkAndMoveSequencesToRecyclingZone(gameState) {
+    for (let i = 0; i < gameState.tableau.length; i++) {
+      const column = gameState.tableau[i];
+      const kingIndex = column.findIndex((card) => card.rank === "K" && card.isFaceUp);
   
-      const twoDecks = deck1.concat(deck2);
-      shuffle(twoDecks);
+      if (kingIndex !== -1) {
+        let sequenceLength = 1;
   
-      // 将所有卡牌放入暂存区
-      const initialGameState = {
-        tableau: Array(10).fill().map(() => []),
-        tempZone: twoDecks.map((card) => ({ ...card, inTempZone: true, isFaceUp: false }))
-      };
-      renderInitialCards(initialGameState);
-      DataStore.setData("gameState", initialGameState);
-      resolve(initialGameState);
-    });
+        for (let j = kingIndex + 1; j < column.length; j++) {
+          const prevCard = column[j - 1];
+          const currentCard = column[j];
+  
+          if (
+            currentCard.isFaceUp &&
+            currentCard.suit === prevCard.suit &&
+            cardValue(currentCard.rank) === cardValue(prevCard.rank) - 1
+          ) {
+            sequenceLength++;
+          } else {
+            break;
+          }
+        }
+  
+        if (sequenceLength === 13) {
+          const sequence = column.splice(kingIndex, 13);
+          gameState.recyclingZone.push(...sequence);
+          return true;
+        }
+      }
+    }
+  
+    return false;
   }
+  
+  
+  function isGameOver(gameState) {
+    return (
+      gameState.tableau.every((column) => column.length === 0) &&
+      gameState.tempZone.length === 0
+    );
+  }
+
+  // async function initializeGameState() {
+  //   return new Promise((resolve) => {
+  //     // 创建2副牌，并洗牌。
+  //     const deck1 = createDeck();
+  //     const deck2 = createDeck();
+  
+  //     const twoDecks = deck1.concat(deck2);
+  //     shuffle(twoDecks);
+  
+  //     // 将所有卡牌放入暂存区
+  //     const initialGameState = {
+  //       tableau: Array(10).fill().map(() => []),
+  //       tempZone: twoDecks.map((card) => ({ ...card, inTempZone: true, isFaceUp: false })),
+  //       recyclingZone: [], // 回收区
+  //     };
+  //     renderInitialCards(initialGameState);
+  //     DataStore.setData("gameState", initialGameState);
+  //     resolve(initialGameState);
+  //   });
+  // }
   
   export async function initApp() {
     const uiUpdater = new UIUpdater();
@@ -774,6 +825,7 @@ function updateMovableToCards(tableau, selectedCard) {
     const initialGameState = {
       tableau: Array(10).fill([]),
       tempZone: twoDecks.map((card) => ({ ...card, inTempZone: true, isFaceUp: false })),
+      recyclingZone: [], // 回收区
     };
     renderInitialCards(initialGameState);
     DataStore.setData("gameState", initialGameState);
