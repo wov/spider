@@ -25,6 +25,10 @@ let cursorColumn = 0;
 let selectedCard = null;
 
 
+const dealCardsButton = document.getElementById("deal-cards");
+dealCardsButton.addEventListener("click", dealCardsToTableau);
+
+
 // 为按钮添加事件监听器
 upButton.addEventListener("click", () => moveCursor('up'));
 downButton.addEventListener("click", () => moveCursor('down'));
@@ -76,8 +80,15 @@ function moveCursor(direction) {
         selectedCard.isSelected = true;
       }
     } else {
-      const nextRow = cursorRow - 1;
-      const nextCard = gameState.tableau[cursorColumn][nextRow];
+      let nextRow = cursorRow - 1;
+      let nextCard = gameState.tableau[cursorColumn][nextRow];
+
+      // 继续向上查找，直到找到一个可选的卡牌或者没有可选的卡牌为止
+      while (nextRow >= 0 && (!nextCard || !isCardSelectable(gameState.tableau, nextCard))) {
+        nextRow--;
+        nextCard = gameState.tableau[cursorColumn][nextRow];
+      }
+
       if (nextCard && isCardSelectable(gameState.tableau, nextCard)) {
         if (selectedCard) {
           selectedCard.isSelected = false;
@@ -182,11 +193,10 @@ function moveCursorHorizontal(direction) {
 
 
 function previewMove(row, column, gameState) {
-  console.log('previewMove')
+  console.log('previewMove');
   // 更新光标位置
   cursorRow = row;
   cursorColumn = column;
-  updateCursorPosition(cursorRow, cursorColumn, gameState);
 
   // 更新选中卡牌及其下面的卡牌的预览位置
   const fromColumnIndex = gameState.tableau.findIndex((col) => col.some((c) => c.isSelected));
@@ -196,14 +206,18 @@ function previewMove(row, column, gameState) {
   movingCards.forEach((card, index) => {
     const cardElement = document.querySelector(`.card[data-id="${card.id}"]`);
     if (cardElement) {
-      // 1. 保持预览卡牌的 z-index 始终在上方
-      cardElement.style.zIndex = '1000';
+      // 1. 使预览卡牌的 z-index 按顺序递增
+      cardElement.style.zIndex = 1000 + index;
 
       // 2. 更新卡牌位置以适应新列底部
       cardElement.style.left = `${column * 10}vw`;
       cardElement.style.top = `${(gameState.tableau[column].length + index) * 15}px`;
     }
   });
+
+  // 更新光标位置，使其跟随选中卡牌的上下移动
+  const numRowsInTargetColumn = gameState.tableau[column].length;
+  updateCursorPosition(numRowsInTargetColumn , cursorColumn, gameState);
 }
 
 
@@ -258,7 +272,9 @@ function confirmMove() {
     });
 
     // 初始化光标位置
-    initializeCursor(gameState);
+    // initializeCursor(gameState);
+    updateCursorPosition(-1, cursorColumn, gameState);
+
 
     // 更新卡牌被压住的状态
     updateCardCoveredStatus(gameState);
@@ -400,6 +416,64 @@ async function dealCards(cards) {
   
     return gameState;
   }
+
+  async function dealCardsToTableau() {
+    // 获取游戏状态
+    const gameState = DataStore.getData("gameState");
+  
+    // 将暂存区中的前 10 张牌分发到游戏区的每一列
+    for (let i = 0; i < 10; i++) {
+      if (gameState.tempZone.length === 0) {
+        break;
+      }
+      const card = gameState.tempZone.pop();
+  
+      // 翻开卡牌
+      card.isFaceUp = true;
+  
+      // 将卡牌添加到对应列的顶部
+      gameState.tableau[i].push(card);
+  
+      // 更新游戏状态
+      DataStore.setData("gameState", gameState);
+  
+      // 在这里添加更新 DOM 的代码，以显示新的游戏状态
+      // 您可以根据需要调用自定义的渲染函数
+      // 更新卡牌被压住的状态
+      updateCardCoveredStatus(gameState);
+      initializeCursor(gameState);
+      // 在每次发牌之间添加 100ms 的延迟
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+  }
+  
+
+  // function dealCardsToTableau() {
+  //   // 获取游戏状态
+  //   const gameState = DataStore.getData("gameState");
+  
+  //   // 将暂存区中的前 10 张牌分发到游戏区的每一列
+  //   for (let i = 0; i < 10; i++) {
+  //     if (gameState.tempZone.length === 0) {
+  //       break;
+  //     }
+  //     const card = gameState.tempZone.pop();
+  
+  //     // 翻开卡牌
+  //     card.isFaceUp = true;
+  
+  //     // 将卡牌添加到对应列的顶部
+  //     gameState.tableau[i].push(card);
+  //   }
+
+  //   // 更新卡牌被压住的状态
+  //   updateCardCoveredStatus(gameState);
+  //   initializeCursor(gameState);
+
+  //   // 更新游戏状态
+  //   DataStore.setData("gameState", gameState);
+  // }
+  
   
 
   function updateCursorPosition(row, column, gameState) {
@@ -447,8 +521,7 @@ async function dealCards(cards) {
 
   
   
-
- function isCardSelectable(tableau, card) {
+function isCardSelectable(tableau, card) {
   // 1. 只有翻开的牌才有可能是可选的，扣合的牌必定不可选。
   if (!card.isFaceUp || card.isSelected) {
     return false;
@@ -471,9 +544,30 @@ async function dealCards(cards) {
     if (cardOnTop.suit !== card.suit || cardValue(cardOnTop.rank) !== cardValue(card.rank) - 1) {
       return false;
     }
+
+      // 3. 如果被其他牌压住，则确保选中卡牌下方的所有卡牌花色相同且依次减小。
+      if (cardIndex < column.length - 1) {
+        for (let i = cardIndex + 1; i < column.length; i++) {
+          const currentCard = column[i];
+
+          // 如果当前卡牌的花色与选中卡牌的花色不同，则返回 false
+          if (currentCard.suit !== card.suit) {
+            return false;
+          }
+
+          // 如果当前卡牌不是最后一张卡牌，检查当前卡牌与下一张卡牌的等级是否依次递减
+          if (i < column.length - 1) {
+            const nextCard = column[i + 1];
+            if (cardValue(currentCard.rank) - 1 !== cardValue(nextCard.rank)) {
+              return false;
+            }
+          }
+        }
+      }
+
   }
 
-  // 3. 如果没有空列的时候，当其他列最上方且翻开的没有比他大“1”，则不可选。
+  // 4. 如果没有空列的时候，当其他列最上方且翻开的没有比他大“1”，则不可选。
   // 如果有空列的时候则可选。
   const hasEmptyColumn = tableau.some((col) => col.length === 0);
   if (!hasEmptyColumn) {
@@ -489,6 +583,7 @@ async function dealCards(cards) {
 
   return true;
 }
+
 
 
 function updateMovableToCards(tableau, selectedCard) {
@@ -691,7 +786,6 @@ function updateMovableToCards(tableau, selectedCard) {
     
     // 更新卡牌被压住的状态
     updateCardCoveredStatus(gameState);
-    
     initializeCursor(gameState);
   });
   
