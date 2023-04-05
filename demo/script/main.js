@@ -9,6 +9,15 @@ let cardId = 0;
 let gameState;
 
 
+// 初始化光标位置
+let cursorRow = -1;
+let cursorColumn = 0;
+
+let selectedCard = null;
+
+let hasMoved = false;
+
+
 // 获取按钮元素
 const upButton = document.getElementById("upButton");
 const downButton = document.getElementById("downButton");
@@ -18,23 +27,16 @@ const rightButton = document.getElementById("rightButton");
 const confirmMoveButton = document.getElementById("confirmMove");
 const cancelMoveButton = document.getElementById("cancelMove");
 
-// 初始化光标位置
-let cursorRow = -1;
-let cursorColumn = 0;
-
-let selectedCard = null;
-
-
 const dealCardsButton = document.getElementById("deal-cards");
-dealCardsButton.addEventListener("click", dealCardsToTableau);
 
+dealCardsButton.addEventListener("click", dealCardsToTableau);
 
 // 为按钮添加事件监听器
 upButton.addEventListener("click", () => moveCursor('up'));
 downButton.addEventListener("click", () => moveCursor('down'));
 
 leftButton.addEventListener("click", () => moveCursorHorizontal('left'));
-rightButton.addEventListener("click",  () => moveCursorHorizontal('right'));
+rightButton.addEventListener("click", () => moveCursorHorizontal('right'));
 
 confirmMoveButton.addEventListener("click", confirmMove);
 cancelMoveButton.addEventListener("click", cancelMove);
@@ -68,6 +70,117 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+
+// 检测游戏手柄的连接
+window.addEventListener("gamepadconnected", (event) => {
+  console.log("A gamepad has been connected:", event.gamepad);
+});
+
+// 检测游戏手柄的断开连接
+window.addEventListener("gamepaddisconnected", (event) => {
+  console.log("A gamepad has been disconnected:", event.gamepad);
+});
+
+const buttonCooldown = 200;
+let buttonTimestamps = {};
+
+function isCooldownOver(buttonIndex) {
+  if (!buttonTimestamps[buttonIndex]) {
+    return true;
+  }
+  const currentTime = performance.now();
+  const elapsedTime = currentTime - buttonTimestamps[buttonIndex];
+  return elapsedTime > buttonCooldown;
+}
+
+function updateGamepadStatus() {
+  const gamepads = navigator.getGamepads();
+
+  for (const gamepad of gamepads) {
+    if (gamepad) {
+      // Switch Pro 手柄按钮索引
+      const upButtonIndex = 12;
+      const downButtonIndex = 13;
+      const leftButtonIndex = 14;
+      const rightButtonIndex = 15;
+      const confirmButtonIndex = 1; // A
+      const cancelButtonIndex = 0; // B
+      const dealCardsButtonIndex = 4; // L
+
+
+      // Switch Pro 左摇杆索引
+      const leftStickXAxis = 0;
+      const leftStickYAxis = 1;
+
+      // 检测摇杆状态
+      const leftStickX = gamepad.axes[leftStickXAxis];
+      const leftStickY = gamepad.axes[leftStickYAxis];
+
+      if (leftStickY < -0.5 && isCooldownOver("stickUp")) {
+        moveCursor("up");
+        buttonTimestamps["stickUp"] = performance.now();
+      } else if (leftStickY > 0.5 && isCooldownOver("stickDown")) {
+        moveCursor("down");
+        buttonTimestamps["stickDown"] = performance.now();
+      }
+
+      if (leftStickX < -0.5 && isCooldownOver("stickLeft")) {
+        moveCursorHorizontal("left");
+        buttonTimestamps["stickLeft"] = performance.now();
+      } else if (leftStickX > 0.5 && isCooldownOver("stickRight")) {
+        moveCursorHorizontal("right");
+        buttonTimestamps["stickRight"] = performance.now();
+      }
+
+
+
+      if (gamepad.buttons[upButtonIndex].pressed && isCooldownOver(upButtonIndex)) {
+        moveCursor("up");
+        buttonTimestamps[upButtonIndex] = performance.now();
+      }
+      if (gamepad.buttons[downButtonIndex].pressed && isCooldownOver(downButtonIndex)) {
+        moveCursor("down");
+        buttonTimestamps[downButtonIndex] = performance.now();
+      }
+      if (gamepad.buttons[leftButtonIndex].pressed && isCooldownOver(leftButtonIndex)) {
+        moveCursorHorizontal("left");
+        buttonTimestamps[leftButtonIndex] = performance.now();
+      }
+      if (gamepad.buttons[rightButtonIndex].pressed && isCooldownOver(rightButtonIndex)) {
+        moveCursorHorizontal("right");
+        buttonTimestamps[rightButtonIndex] = performance.now();
+      }
+      if (gamepad.buttons[confirmButtonIndex].pressed && isCooldownOver(confirmButtonIndex)) {
+        confirmMove();
+        buttonTimestamps[confirmButtonIndex] = performance.now();
+      }
+      if (gamepad.buttons[cancelButtonIndex].pressed && isCooldownOver(cancelButtonIndex)) {
+        cancelMove();
+        buttonTimestamps[cancelButtonIndex] = performance.now();
+      }
+      if (gamepad.buttons[dealCardsButtonIndex].pressed && isCooldownOver(dealCardsButtonIndex)) {
+        dealCardsToTableau();
+        buttonTimestamps[dealCardsButtonIndex] = performance.now();
+      }
+    }
+  }
+}
+
+// 在主循环中调用 updateGamepadStatus
+function gameLoop() {
+  updateGamepadStatus();
+
+  // 其他游戏循环逻辑
+
+  requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+
+
+// 开始更新游戏手柄状态
+updateGamepadStatus();
+
 // 处理函数
 function moveCursor(direction) {
   gameState = DataStore.getData("gameState");
@@ -99,17 +212,22 @@ function moveCursor(direction) {
       }
     }
   } else if (direction === "down") {
-    if (cursorRow < gameState.tableau[cursorColumn].length - 1) {
-      const nextRow = cursorRow + 1;
-      const nextCard = gameState.tableau[cursorColumn][nextRow];
-      if (nextCard && isCardSelectable(gameState.tableau, nextCard)) {
-        if (selectedCard) {
-          selectedCard.isSelected = false;
-        }
-        cursorRow = nextRow;
-        selectedCard = nextCard;
-        selectedCard.isSelected = true;
+    let nextRow = cursorRow + 1;
+    let nextCard = gameState.tableau[cursorColumn][nextRow];
+
+    // 继续向下查找，直到找到一个可选的卡牌或者没有可选的卡牌为止
+    while (nextRow < gameState.tableau[cursorColumn].length && (!nextCard || !isCardSelectable(gameState.tableau, nextCard))) {
+      nextRow++;
+      nextCard = gameState.tableau[cursorColumn][nextRow];
+    }
+
+    if (nextCard && isCardSelectable(gameState.tableau, nextCard)) {
+      if (selectedCard) {
+        selectedCard.isSelected = false;
       }
+      cursorRow = nextRow;
+      selectedCard = nextCard;
+      selectedCard.isSelected = true;
     } else {
       if (selectedCard) {
         selectedCard.isSelected = false;
@@ -124,7 +242,7 @@ function moveCursor(direction) {
   updateCursorPosition(cursorRow, cursorColumn, gameState);
   DataStore.setData("gameState", gameState);
 }
-  
+
 function moveCursorHorizontal(direction) {
   const delta = direction === "left" ? -1 : 1;
   let newCursorColumn = cursorColumn + delta;
@@ -143,6 +261,7 @@ function moveCursorHorizontal(direction) {
     // 如果选中了卡牌
     let counter = 0;
     let foundValidMove = false;
+    hasMoved = true;
 
     // 寻找可以移动到的列
     while (!foundValidMove && counter < 10) {
@@ -191,7 +310,6 @@ function moveCursorHorizontal(direction) {
   }
 }
 
-
 function previewMove(row, column, gameState) {
   console.log('previewMove');
   // 更新光标位置
@@ -217,21 +335,18 @@ function previewMove(row, column, gameState) {
 
   // 更新光标位置，使其跟随选中卡牌的上下移动
   const numRowsInTargetColumn = gameState.tableau[column].length;
-  updateCursorPosition(numRowsInTargetColumn , cursorColumn, gameState);
+  updateCursorPosition(numRowsInTargetColumn, cursorColumn, gameState);
 }
-
-
 
 function columnHasSelectableCard(tableau, columnIndex) {
-    const column = tableau[columnIndex];
-    for (const card of column) {
-        if (isCardSelectable(tableau, card)) {
-            return true;
-        }
+  const column = tableau[columnIndex];
+  for (const card of column) {
+    if (isCardSelectable(tableau, card)) {
+      return true;
     }
-    return false;
+  }
+  return false;
 }
-
 
 function getLastSelectableCardInColumn(columnIndex) {
   const column = gameState.tableau[columnIndex];
@@ -245,6 +360,18 @@ function getLastSelectableCardInColumn(columnIndex) {
 
 function confirmMove() {
   if (selectedCard) {
+    // 如果用户没有移动过，查找最佳目标列
+    if (!hasMoved) {
+      const bestTargetColumn = findBestTargetColumn(gameState);
+      if (bestTargetColumn !== -1) {
+        // 将选择的卡牌和下面的队列移动到最佳目标列
+        moveSelectedCardsToColumn(gameState, bestTargetColumn);
+        // 将光标移动到最佳目标列
+        cursorColumn = bestTargetColumn;
+        cursorRow = gameState.tableau[bestTargetColumn].length - 1;
+      }
+    }
+
     const fromColumnIndex = gameState.tableau.findIndex((col) => col.some((c) => c.isSelected));
     const selectedCardIndex = gameState.tableau[fromColumnIndex].findIndex((card) => card.isSelected);
     const movingCards = gameState.tableau[fromColumnIndex].splice(selectedCardIndex);
@@ -253,12 +380,21 @@ function confirmMove() {
     gameState.tableau[cursorColumn].push(...movingCards);
 
     // 如果原始列顶部的卡牌是扣合的，翻开它
-    if (gameState.tableau[fromColumnIndex].length > 0) {
-      const topCard = gameState.tableau[fromColumnIndex][gameState.tableau[fromColumnIndex].length - 1];
-      if (!topCard.isFaceUp) {
-        topCard.isFaceUp = true;
+    gameState.tableau.forEach((column) => {
+      if (column.length > 0) {
+        const lastCard = column[column.length - 1];
+        if (!lastCard.isFaceUp) {
+          lastCard.isFaceUp = true;
+        }
       }
-    }
+    });
+
+    // if (gameState.tableau[fromColumnIndex].length > 0) {
+    //   const topCard = gameState.tableau[fromColumnIndex][gameState.tableau[fromColumnIndex].length - 1];
+    //   if (!topCard.isFaceUp) {
+    //     topCard.isFaceUp = true;
+    //   }
+    // }
 
     // 取消选中的卡牌
     movingCards.forEach((card) => {
@@ -272,21 +408,19 @@ function confirmMove() {
     });
 
     // 初始化光标位置
-    // initializeCursor(gameState);
-    updateCursorPosition(-1, cursorColumn, gameState);
-
+    cursorRow = -1;
+    updateCursorPosition(cursorRow, cursorColumn, gameState);
 
     // 更新卡牌被压住的状态
     updateCardCoveredStatus(gameState);
-    
     const movedToRecycling = checkAndMoveSequencesToRecyclingZone(gameState);
 
+    hasMoved = false;
 
     // 重新渲染卡牌
     DataStore.setData("gameState", gameState);
   }
 }
-
 
 
 function cancelMove() {
@@ -307,52 +441,123 @@ function cancelMove() {
     // 更新光标位置
     updateCursorPosition(cursorRow, cursorColumn, gameState);
 
+    hasMoved = false;
     // 重新渲染卡牌
     DataStore.setData("gameState", gameState);
   }
 }
 
+function moveSelectedCardsToColumn(gameState, targetColumn) {
+  const fromColumnIndex = gameState.tableau.findIndex((col) => col.some((c) => c.isSelected));
+  const selectedCardIndex = gameState.tableau[fromColumnIndex].findIndex((card) => card.isSelected);
+  const movingCards = gameState.tableau[fromColumnIndex].splice(selectedCardIndex);
+
+  // 添加卡牌到目标列
+  gameState.tableau[targetColumn].push(...movingCards);
+
+  // 更新卡牌位置以适应新列底部
+  movingCards.forEach((card, index) => {
+    const cardElement = document.querySelector(`.card[data-id="${card.id}"]`);
+    if (cardElement) {
+      // 1. 使卡牌的 z-index 按顺序递增
+      cardElement.style.zIndex = 1000 + index;
+
+      // 2. 更新卡牌位置以适应新列底部
+      cardElement.style.left = `${targetColumn * 10}vw`;
+      cardElement.style.top = `${(gameState.tableau[targetColumn].length - movingCards.length + index) * 15}px`;
+    }
+  });
+
+
+
+}
+
+
+
+function findBestTargetColumn(gameState) {
+  const fromColumnIndex = gameState.tableau.findIndex((col) => col.some((c) => c.isSelected));
+  const selectedCard = gameState.tableau[fromColumnIndex].find((card) => card.isSelected);
+
+  // 优先级 1：同色并且大于1的牌
+  const sameColorHigherRankColumns = gameState.tableau
+    .map((column, index) => ({ column, index }))
+    .filter(({ column }) => {
+      if (column.length === 0) return false;
+      const lastCard = column[column.length - 1];
+      return (
+        lastCard.suit === selectedCard.suit &&
+        cardValue(lastCard.rank) === cardValue(selectedCard.rank) + 1
+      );
+    });
+
+  if (sameColorHigherRankColumns.length > 0) {
+    return sameColorHigherRankColumns[0].index;
+  }
+
+  // 优先级 2：大于1的牌
+  const higherRankColumns = gameState.tableau
+    .map((column, index) => ({ column, index }))
+    .filter(({ column }) => {
+      if (column.length === 0) return false;
+      const lastCard = column[column.length - 1];
+      return cardValue(lastCard.rank) === cardValue(selectedCard.rank) + 1;
+    });
+
+  if (higherRankColumns.length > 0) {
+    return higherRankColumns[0].index;
+  }
+
+  // 优先级 3：空列
+  const emptyColumnIndex = gameState.tableau.findIndex((column) => column.length === 0);
+  if (emptyColumnIndex !== -1) {
+    return emptyColumnIndex;
+  }
+
+  return -1; // 没有找到合适的列
+}
+
+
 
 
 // update ui
 class UIUpdater extends Observer {
-    update(data) {
-      console.log("Data changed:", data);
-      if (data.hasOwnProperty("gameState")) {
-        renderCards(data.gameState);
-      }
+  update(data) {
+    console.log("Data changed:", data);
+    if (data.hasOwnProperty("gameState")) {
+      renderCards(data.gameState);
     }
   }
+}
 
-  function createDeck() {
-    const suits = ["spade", "club", "diamond", "heart"];
-    const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
-    const deck = [];
-  
-    for (const suit of suits) {
-      for (const rank of ranks) {
-        deck.push({
-          id: cardId++,
-          suit,
-          rank,
-          inTempZone: true, // 是否在暂存区
-          isFaceUp: false, // 是否翻开
-          isSelectable: false, // 是否可选
-          isSelected: false, // 是否被选中
-          isMovableTo: false, // 是否可被移动到
-          isCovered: false, // 是否被压住
-        });
-      }
+function createDeck() {
+  const suits = ["spade", "club", "diamond", "heart"];
+  const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
+  const deck = [];
+
+  for (const suit of suits) {
+    for (const rank of ranks) {
+      deck.push({
+        id: cardId++,
+        suit,
+        rank,
+        inTempZone: true, // 是否在暂存区
+        isFaceUp: false, // 是否翻开
+        isSelectable: false, // 是否可选
+        isSelected: false, // 是否被选中
+        isMovableTo: false, // 是否可被移动到
+        isCovered: false, // 是否被压住
+      });
     }
-    return deck;
   }
-  
-  
+  return deck;
+}
+
+
 function shuffle(cards) {
-    for (let i = cards.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [cards[i], cards[j]] = [cards[j], cards[i]];
-    }
+  for (let i = cards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cards[i], cards[j]] = [cards[j], cards[i]];
+  }
 }
 
 // 第一次发牌，初始化游戏
@@ -424,63 +629,63 @@ async function dealCards(cards) {
 }
 
 
-  // 发牌
-  async function dealCardsToTableau() {
-    // 获取游戏状态
-    const gameState = DataStore.getData("gameState");
-  
-    // 将暂存区中的前 10 张牌分发到游戏区的每一列
-    for (let i = 0; i < 10; i++) {
-      if (gameState.tempZone.length === 0) {
-        break;
-      }
-      const card = gameState.tempZone.pop();
-  
-      // 翻开卡牌
-      card.isFaceUp = true;
-  
-      // 将卡牌添加到对应列的顶部
-      gameState.tableau[i].push(card);
+// 发牌
+async function dealCardsToTableau() {
+  // 获取游戏状态
+  const gameState = DataStore.getData("gameState");
 
-      const movedToRecycling = checkAndMoveSequencesToRecyclingZone(gameState);
-  
-      // 更新游戏状态
-      DataStore.setData("gameState", gameState);
-  
-      // 在这里添加更新 DOM 的代码，以显示新的游戏状态
-      // 您可以根据需要调用自定义的渲染函数
-      // 更新卡牌被压住的状态
-      updateCardCoveredStatus(gameState);
-      initializeCursor(gameState);
-      // 在每次发牌之间添加 100ms 的延迟
-      await new Promise((resolve) => setTimeout(resolve, 100));
+  // 将暂存区中的前 10 张牌分发到游戏区的每一列
+  for (let i = 0; i < 10; i++) {
+    if (gameState.tempZone.length === 0) {
+      break;
     }
+    const card = gameState.tempZone.pop();
+
+    // 翻开卡牌
+    card.isFaceUp = true;
+
+    // 将卡牌添加到对应列的顶部
+    gameState.tableau[i].push(card);
+
+    const movedToRecycling = checkAndMoveSequencesToRecyclingZone(gameState);
+
+    // 更新游戏状态
+    DataStore.setData("gameState", gameState);
+
+    // 在这里添加更新 DOM 的代码，以显示新的游戏状态
+    // 您可以根据需要调用自定义的渲染函数
+    // 更新卡牌被压住的状态
+    updateCardCoveredStatus(gameState);
+    initializeCursor(gameState);
+    // 在每次发牌之间添加 100ms 的延迟
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
-  
+}
 
-  function updateCursorPosition(row, column, gameState) {
-    console.log("updateCursorPosition", row, column, gameState);
-  
-    const spider = document.getElementById("spider");
-    const silk = document.getElementById("silk");
-  
-    const numCardsInColumn = gameState.tableau[column].length;
-  
-    if (row === -1) {
-      spider.style.transform = `translate(-50%, -50%) translate(${column * 10 + 5}vw, ${(numCardsInColumn * 15) + 50}px)`;
-    } else {
-      spider.style.transform = `translate(-50%, -50%) translate(${column * 10 + 5}vw, ${row * 15}px)`;
-    }
-  
-    // 更新蜘蛛丝位置
-    const xValue = `${column * 10 + 5}vw`;
-    const y2Value = row === -1 ? `${(numCardsInColumn * 15) + 50}px` : `${row * 15}px`;
-  
-    silk.style.left = xValue;
-    silk.style.height = y2Value;  
- }
 
- function initializeCursor(gameState) {
+function updateCursorPosition(row, column, gameState) {
+  console.log("updateCursorPosition", row, column, gameState);
+
+  const spider = document.getElementById("spider");
+  const silk = document.getElementById("silk");
+
+  const numCardsInColumn = gameState.tableau[column].length;
+
+  if (row === -1) {
+    spider.style.transform = `translate(-50%, -50%) translate(${column * 10 + 5}vw, ${(numCardsInColumn * 15) + 50}px)`;
+  } else {
+    spider.style.transform = `translate(-50%, -50%) translate(${column * 10 + 5}vw, ${row * 15}px)`;
+  }
+
+  // 更新蜘蛛丝位置
+  const xValue = `${column * 10 + 5}vw`;
+  const y2Value = row === -1 ? `${(numCardsInColumn * 15) + 50}px` : `${row * 15}px`;
+
+  silk.style.left = xValue;
+  silk.style.height = y2Value;
+}
+
+function initializeCursor(gameState) {
   const tableau = gameState.tableau;
   let foundSelectableColumn = false;
 
@@ -501,8 +706,8 @@ async function dealCards(cards) {
   updateCursorPosition(cursorRow, cursorColumn, gameState);
 }
 
-  
-  
+
+
 function isCardSelectable(tableau, card) {
   // 1. 只有翻开的牌才有可能是可选的，扣合的牌必定不可选。
   if (!card.isFaceUp || card.isSelected) {
@@ -527,25 +732,25 @@ function isCardSelectable(tableau, card) {
       return false;
     }
 
-      // 3. 如果被其他牌压住，则确保选中卡牌下方的所有卡牌花色相同且依次减小。
-      if (cardIndex < column.length - 1) {
-        for (let i = cardIndex + 1; i < column.length; i++) {
-          const currentCard = column[i];
+    // 3. 如果被其他牌压住，则确保选中卡牌下方的所有卡牌花色相同且依次减小。
+    if (cardIndex < column.length - 1) {
+      for (let i = cardIndex + 1; i < column.length; i++) {
+        const currentCard = column[i];
 
-          // 如果当前卡牌的花色与选中卡牌的花色不同，则返回 false
-          if (currentCard.suit !== card.suit) {
+        // 如果当前卡牌的花色与选中卡牌的花色不同，则返回 false
+        if (currentCard.suit !== card.suit) {
+          return false;
+        }
+
+        // 如果当前卡牌不是最后一张卡牌，检查当前卡牌与下一张卡牌的等级是否依次递减
+        if (i < column.length - 1) {
+          const nextCard = column[i + 1];
+          if (cardValue(currentCard.rank) - 1 !== cardValue(nextCard.rank)) {
             return false;
-          }
-
-          // 如果当前卡牌不是最后一张卡牌，检查当前卡牌与下一张卡牌的等级是否依次递减
-          if (i < column.length - 1) {
-            const nextCard = column[i + 1];
-            if (cardValue(currentCard.rank) - 1 !== cardValue(nextCard.rank)) {
-              return false;
-            }
           }
         }
       }
+    }
 
   }
 
@@ -597,28 +802,28 @@ function updateMovableToCards(tableau, selectedCard) {
 
 
 
-  // 辅助函数，将卡牌等级转换为数字，以便于比较大小
-  function cardValue(rank) {
-    if (rank === "A") {
-      return 1;
-    } else if (rank === "K") {
-      return 13;
-    } else if (rank === "Q") {
-      return 12;
-    } else if (rank === "J") {
-      return 11;
-    } else {
-      return parseInt(rank, 10);
-    }
+// 辅助函数，将卡牌等级转换为数字，以便于比较大小
+function cardValue(rank) {
+  if (rank === "A") {
+    return 1;
+  } else if (rank === "K") {
+    return 13;
+  } else if (rank === "Q") {
+    return 12;
+  } else if (rank === "J") {
+    return 11;
+  } else {
+    return parseInt(rank, 10);
   }
-  
-  
-  function renderCard(card) {
-    const isRed = card.suit === "diamond" || card.suit === "heart";
-    const color = isRed ? "red" : "black";
-  
-    const cardElement = document.createElement("div");
-    cardElement.innerHTML = `
+}
+
+
+function renderCard(card) {
+  const isRed = card.suit === "diamond" || card.suit === "heart";
+  const color = isRed ? "red" : "black";
+
+  const cardElement = document.createElement("div");
+  cardElement.innerHTML = `
       <div class="card ${card.isFaceUp ? 'face-up' : 'face-down'}" data-id="${card.id}" data-value="${card.rank}" data-suit="${card.suit}">
         <div class="front">
           <div class="value">
@@ -634,210 +839,210 @@ function updateMovableToCards(tableau, selectedCard) {
         <div class="back"></div>
       </div>
     `;
-  
-    const cardEl = cardElement.querySelector(".card");
-    cardEl.style.left = initialLeft;
-    cardEl.style.top = initialTop;
-    return cardEl;
-  }
-    
-  function updateCardCoveredStatus(gameState) {
-    gameState.tableau.forEach((column) => {
-      column.forEach((card, cardIndex) => {
-        card.isCovered = cardIndex < column.length - 1;
-      });
+
+  const cardEl = cardElement.querySelector(".card");
+  cardEl.style.left = initialLeft;
+  cardEl.style.top = initialTop;
+  return cardEl;
+}
+
+function updateCardCoveredStatus(gameState) {
+  gameState.tableau.forEach((column) => {
+    column.forEach((card, cardIndex) => {
+      card.isCovered = cardIndex < column.length - 1;
     });
-  }
-  
+  });
+}
 
-  function renderInitialCards(gameState) {
-    const cardContainer = document.getElementById("cardContainer");
-  
-    gameState.tempZone.forEach((card) => {
-      const cardElement = renderCard(card);
-      cardContainer.appendChild(cardElement);
+
+function renderInitialCards(gameState) {
+  const cardContainer = document.getElementById("cardContainer");
+
+  gameState.tempZone.forEach((card) => {
+    const cardElement = renderCard(card);
+    cardContainer.appendChild(cardElement);
+  });
+}
+
+
+function renderCards(gameState) {
+  const cardContainer = document.getElementById("cardContainer");
+  const cards = Array.from(cardContainer.querySelectorAll(".card"));
+
+  gameState.tableau.forEach((column, columnIndex) => {
+    column.forEach((card, cardIndex) => {
+      const cardElement = cards.find((el) => el.dataset.id === card.id.toString());
+
+      if (!cardElement) {
+        console.error("Card element not found:", card);
+        return;
+      }
+
+      cardElement.style.left = `${columnIndex * 10}vw`;
+      cardElement.style.top = `${cardIndex * 15}px`;
+      cardElement.style.zIndex = `${cardIndex + 1}`; // 设置 z-index
+
+      // 更新卡牌的翻开状态
+      cardElement.classList.toggle("face-up", card.isFaceUp);
+      cardElement.classList.toggle("face-down", !card.isFaceUp);
+
+      // 更新卡牌的可选和选中状态
+      card.isSelectable = isCardSelectable(gameState.tableau, card);
+      cardElement.classList.toggle("selectable", card.isSelectable);
+
+      cardElement.classList.toggle("selected", card.isSelected);
+
+      // 更新卡牌的可移动到状态
+      cardElement.classList.toggle("movable-to", card.isMovableTo);
+
+      // 根据卡牌的 isCovered 属性，添加或移除 'covered' 类名
+      cardElement.classList.toggle('covered', card.isCovered);
     });
-  }
-  
-  
-  function renderCards(gameState) {
-    const cardContainer = document.getElementById("cardContainer");
-    const cards = Array.from(cardContainer.querySelectorAll(".card"));
-  
-    gameState.tableau.forEach((column, columnIndex) => {
-      column.forEach((card, cardIndex) => {
-        const cardElement = cards.find((el) => el.dataset.id === card.id.toString());
-  
-        if (!cardElement) {
-          console.error("Card element not found:", card);
-          return;
-        }
-  
-        cardElement.style.left = `${columnIndex * 10}vw`;
-        cardElement.style.top = `${cardIndex * 15}px`;
-        cardElement.style.zIndex = `${cardIndex + 1}`; // 设置 z-index
-  
-        // 更新卡牌的翻开状态
-        cardElement.classList.toggle("face-up", card.isFaceUp);
-        cardElement.classList.toggle("face-down", !card.isFaceUp);
+  });
 
-        // 更新卡牌的可选和选中状态
-        card.isSelectable = isCardSelectable(gameState.tableau, card);
-        cardElement.classList.toggle("selectable", card.isSelectable);  
+  gameState.tempZone.forEach((card) => {
+    const cardElement = cards.find((el) => el.dataset.id === card.id.toString());
 
-        cardElement.classList.toggle("selected", card.isSelected);
+    if (!cardElement) {
+      console.error("Card element not found:", card);
+      return;
+    }
 
-        // 更新卡牌的可移动到状态
-        cardElement.classList.toggle("movable-to", card.isMovableTo);
-
-        // 根据卡牌的 isCovered 属性，添加或移除 'covered' 类名
-        cardElement.classList.toggle('covered', card.isCovered);
-      });
-    });
-  
-    gameState.tempZone.forEach((card) => {
-        const cardElement = cards.find((el) => el.dataset.id === card.id.toString());
-      
-        if (!cardElement) {
-          console.error("Card element not found:", card);
-          return;
-        }
-      
-        cardElement.style.left = initialLeft;
-        cardElement.style.top = initialTop;
-        cardElement.style.zIndex = "0"; // 设置 z-index 为 0，使得暂存区的卡牌始终位于游戏区卡牌之下
-    
-      
-        // 更新卡牌的翻开状态
-        card.isSelectable = isCardSelectable(gameState.tableau, card);
-        cardElement.classList.toggle("selectable", card.isSelectable);
-        cardElement.classList.toggle("selected", card.isSelected);
+    cardElement.style.left = initialLeft;
+    cardElement.style.top = initialTop;
+    cardElement.style.zIndex = "0"; // 设置 z-index 为 0，使得暂存区的卡牌始终位于游戏区卡牌之下
 
 
-        cardElement.classList.toggle("face-up", card.isFaceUp);
-        cardElement.classList.toggle("face-down", !card.isFaceUp);
-      });
-      
+    // 更新卡牌的翻开状态
+    card.isSelectable = isCardSelectable(gameState.tableau, card);
+    cardElement.classList.toggle("selectable", card.isSelectable);
+    cardElement.classList.toggle("selected", card.isSelected);
 
-      // 渲染回收区的卡牌
-      gameState.recyclingZone.forEach((card, cardIndex) => {
-        const cardElement = cards.find((el) => el.dataset.id === card.id.toString());
 
-        if (!cardElement) {
-          console.error("Card element not found:", card);
-          return;
-        }
+    cardElement.classList.toggle("face-up", card.isFaceUp);
+    cardElement.classList.toggle("face-down", !card.isFaceUp);
+  });
 
-        // 计算卡牌位置
-        const recyclingZoneLeft = 80; // 可根据需要修改回收区距离左侧的百分比
-        const recyclingZoneTop = 80; // 可根据需要修改回收区距离顶部的百分比
-        const recyclingZoneSpacing = 1; // 可根据需要修改回收区卡牌间距的像素值
 
-        cardElement.style.left = `${recyclingZoneLeft}vw`;
-        cardElement.style.top = `${recyclingZoneTop + cardIndex * recyclingZoneSpacing}vh`;
-        cardElement.style.zIndex = `${1000 + cardIndex}`; // 设置较高的 z-index 以确保回收区卡牌显示在顶部
+  // 渲染回收区的卡牌
+  gameState.recyclingZone.forEach((card, cardIndex) => {
+    const cardElement = cards.find((el) => el.dataset.id === card.id.toString());
 
-        // 更新卡牌的翻开状态
-        cardElement.classList.toggle("face-up", card.isFaceUp);
-        cardElement.classList.toggle("face-down", !card.isFaceUp);
+    if (!cardElement) {
+      console.error("Card element not found:", card);
+      return;
+    }
 
-        // 移除回收区卡牌的可选、选中和可移动到状态
-        cardElement.classList.remove("selectable", "selected", "movable-to");
-      });
+    // 计算卡牌位置
+    const recyclingZoneLeft = 80; // 可根据需要修改回收区距离左侧的百分比
+    const recyclingZoneTop = 80; // 可根据需要修改回收区距离顶部的百分比
+    const recyclingZoneSpacing = 1; // 可根据需要修改回收区卡牌间距的像素值
 
-  }
+    cardElement.style.left = `${recyclingZoneLeft}vw`;
+    cardElement.style.top = `${recyclingZoneTop + cardIndex * recyclingZoneSpacing}vh`;
+    cardElement.style.zIndex = `${1000 + cardIndex}`; // 设置较高的 z-index 以确保回收区卡牌显示在顶部
 
-  function checkAndMoveSequencesToRecyclingZone(gameState) {
-    for (let i = 0; i < gameState.tableau.length; i++) {
-      const column = gameState.tableau[i];
-      const kingIndex = column.findIndex((card) => card.rank === "K" && card.isFaceUp);
-  
-      if (kingIndex !== -1) {
-        let sequenceLength = 1;
-  
-        for (let j = kingIndex + 1; j < column.length; j++) {
-          const prevCard = column[j - 1];
-          const currentCard = column[j];
-  
-          if (
-            currentCard.isFaceUp &&
-            currentCard.suit === prevCard.suit &&
-            cardValue(currentCard.rank) === cardValue(prevCard.rank) - 1
-          ) {
-            sequenceLength++;
-          } else {
-            break;
-          }
-        }
-  
-        if (sequenceLength === 13) {
-          const sequence = column.splice(kingIndex, 13);
-          gameState.recyclingZone.push(...sequence);
-          return true;
+    // 更新卡牌的翻开状态
+    cardElement.classList.toggle("face-up", card.isFaceUp);
+    cardElement.classList.toggle("face-down", !card.isFaceUp);
+
+    // 移除回收区卡牌的可选、选中和可移动到状态
+    cardElement.classList.remove("selectable", "selected", "movable-to");
+  });
+
+}
+
+function checkAndMoveSequencesToRecyclingZone(gameState) {
+  let movedToRecycling = false;
+
+  for (let i = 0; i < gameState.tableau.length; i++) {
+    const column = gameState.tableau[i];
+    const kingIndices = column.reduce((indices, card, index) => {
+      if (card.rank === "K" && card.isFaceUp) {
+        indices.push(index);
+      }
+      return indices;
+    }, []);
+
+    for (const kingIndex of kingIndices) {
+      let sequenceLength = 1;
+
+      for (let j = kingIndex + 1; j < column.length; j++) {
+        const prevCard = column[j - 1];
+        const currentCard = column[j];
+
+        if (
+          currentCard.isFaceUp &&
+          currentCard.suit === prevCard.suit &&
+          cardValue(currentCard.rank) === cardValue(prevCard.rank) - 1
+        ) {
+          sequenceLength++;
+        } else {
+          break;
         }
       }
+
+      if (sequenceLength === 13) {
+        const sequence = column.splice(kingIndex, 13);
+        gameState.recyclingZone.push(...sequence);
+        movedToRecycling = true;
+      }
     }
-  
-    return false;
-  }
-  
-  
-  function isGameOver(gameState) {
-    return (
-      gameState.tableau.every((column) => column.length === 0) &&
-      gameState.tempZone.length === 0
-    );
   }
 
-  // async function initializeGameState() {
-  //   return new Promise((resolve) => {
-  //     // 创建2副牌，并洗牌。
-  //     const deck1 = createDeck();
-  //     const deck2 = createDeck();
-  
-  //     const twoDecks = deck1.concat(deck2);
-  //     shuffle(twoDecks);
-  
-  //     // 将所有卡牌放入暂存区
-  //     const initialGameState = {
-  //       tableau: Array(10).fill().map(() => []),
-  //       tempZone: twoDecks.map((card) => ({ ...card, inTempZone: true, isFaceUp: false })),
-  //       recyclingZone: [], // 回收区
-  //     };
-  //     renderInitialCards(initialGameState);
-  //     DataStore.setData("gameState", initialGameState);
-  //     resolve(initialGameState);
-  //   });
-  // }
-  
-  export async function initApp() {
-    const uiUpdater = new UIUpdater();
-    DataStore.addObserver(uiUpdater);
-  
-    // 创建2副牌，并洗牌。
-    const deck1 = createDeck();
-    const deck2 = createDeck();
-  
-    const twoDecks = deck1.concat(deck2);
-    shuffle(twoDecks);
-  
-    // 将所有卡牌放入暂存区
-    const initialGameState = {
-      tableau: Array(10).fill([]),
-      tempZone: twoDecks.map((card) => ({ ...card, inTempZone: true, isFaceUp: false })),
-      recyclingZone: [], // 回收区
-    };
-    renderInitialCards(initialGameState);
-    DataStore.setData("gameState", initialGameState);
-    // 绘制初始UI，所有卡牌扣合且在暂存区
-    await dealCards([...twoDecks]); // 使用解构来创建卡牌数组的副本
+  // 如果有卡片被移到回收区，检查游戏区的每一列的最后一张卡片是否需要翻开
+  if (movedToRecycling) {
+    gameState.tableau.forEach((column) => {
+      if (column.length > 0) {
+        const lastCard = column[column.length - 1];
+        if (!lastCard.isFaceUp) {
+          lastCard.isFaceUp = true;
+        }
+      }
+    });
   }
 
-  document.addEventListener("gameStateInitialized", (event) => {
-    const gameState = event.detail.gameState;
-    
-    // 更新卡牌被压住的状态
-    updateCardCoveredStatus(gameState);
-    initializeCursor(gameState);
-  });
-  
+  return movedToRecycling;
+}
+
+function isGameOver(gameState) {
+  return (
+    gameState.tableau.every((column) => column.length === 0) &&
+    gameState.tempZone.length === 0
+  );
+}
+
+
+export async function initApp() {
+  const uiUpdater = new UIUpdater();
+  DataStore.addObserver(uiUpdater);
+
+  // 创建2副牌，并洗牌。
+  const deck1 = createDeck();
+  const deck2 = createDeck();
+
+  const twoDecks = deck1.concat(deck2);
+  shuffle(twoDecks);
+
+  // 将所有卡牌放入暂存区
+  const initialGameState = {
+    tableau: Array(10).fill([]),
+    tempZone: twoDecks.map((card) => ({ ...card, inTempZone: true, isFaceUp: false })),
+    recyclingZone: [], // 回收区
+  };
+  renderInitialCards(initialGameState);
+  DataStore.setData("gameState", initialGameState);
+  // 绘制初始UI，所有卡牌扣合且在暂存区
+  await dealCards([...twoDecks]); // 使用解构来创建卡牌数组的副本
+}
+
+document.addEventListener("gameStateInitialized", (event) => {
+  const gameState = event.detail.gameState;
+
+  // 更新卡牌被压住的状态
+  updateCardCoveredStatus(gameState);
+  initializeCursor(gameState);
+});
+
+
+
