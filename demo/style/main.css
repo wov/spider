@@ -28,6 +28,10 @@ html,body{
 } */
 
 
+p{
+    margin: 0;
+}
+
 html{
     background-color: var(--main-bg);
     /* background-image: url('/image/bg.jpg'); */
@@ -211,7 +215,9 @@ div.card.face-down div.front{
 .controlContainer{
     position: absolute;
     bottom: 0;
-    width: 100%;
+    right: 0;
+    text-align: right;
+    padding: 10px;
 }
 
 

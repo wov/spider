@@ -321,7 +321,7 @@ function moveCursorHorizontal(direction) {
 }
 
 function previewMove(row, column, gameState) {
-  console.log('previewMove');
+
   // 更新光标位置
   cursorRow = row;
   cursorColumn = column;
@@ -431,6 +431,7 @@ function confirmMove() {
 
     hasMoved = false;
 
+    gameState.stepCount += 1;
     // 重新渲染卡牌
     DataStore.setData("gameState", gameState);
   }
@@ -555,10 +556,12 @@ class UIUpdater extends Observer {
       });
 
 
-            // 更新显示的卡牌数量
+      // 更新显示的卡牌数量
       document.getElementById("tableauFaceDownCount").textContent = tableauFaceDownCount;
       document.getElementById("tableauFaceUpCount").textContent = tableauFaceUpCount;
-      
+
+      // 更新步数
+      document.getElementById("stepCount").textContent = `Step count: ${data.gameState.stepCount}`;
 
       const possibleSuitSequences = countPossibleSuitSequences(data.gameState.tableau);
       data.gameState.possibleSuitSequences = possibleSuitSequences;
@@ -658,6 +661,7 @@ async function dealCards(cards) {
         tableau,
         tempZone,
         recyclingZone,
+        stepCount: 0, // 初始化步数为 0
       };
       DataStore.setData("gameState", gameState);
 
@@ -684,6 +688,7 @@ async function dealCards(cards) {
     tableau,
     tempZone,
     recyclingZone,
+    stepCount: 0, // 初始化步数为 0
   };
 
   // 触发 gameStateInitialized 事件
@@ -1119,6 +1124,7 @@ export async function initApp() {
     tempZone: twoDecks.map((card) => ({ ...card, inTempZone: true, isFaceUp: false })),
     recyclingZone: [], // 回收区
     possibleSuitSequences: [], // 有没有可回收的花色
+    stepCount: 0, // 初始化步数为 0
   };
   renderInitialCards(initialGameState);
   DataStore.setData("gameState", initialGameState);
