@@ -41,6 +41,9 @@ rightButton.addEventListener("click", () => moveCursorHorizontal('right'));
 confirmMoveButton.addEventListener("click", confirmMove);
 cancelMoveButton.addEventListener("click", cancelMove);
 
+const initializeAppButton = document.getElementById("initializeApp");
+initializeAppButton.addEventListener("click", initApp, { once: true });
+
 document.addEventListener("keydown", (event) => {
   switch (event.key.toLowerCase()) {
     case "arrowup":
@@ -65,6 +68,13 @@ document.addEventListener("keydown", (event) => {
     case "escape":
       cancelMove();
       break;
+    case "q":
+      dealCardsToTableau();
+      break;
+    case "e":
+      initApp();
+      break;
+
     default:
       break;
   }
@@ -525,9 +535,31 @@ class UIUpdater extends Observer {
     console.log("Data changed:", data);
     if (data.hasOwnProperty("gameState")) {
       renderCards(data.gameState);
+
+      // 计算各区域的卡牌数量
+      let tableauFaceDownCount = 0;
+      let tableauFaceUpCount = 0;
+
+      data.gameState.tableau.forEach((column) => {
+        column.forEach((card) => {
+          if (card.isFaceUp) {
+            tableauFaceUpCount++;
+          } else {
+            tableauFaceDownCount++;
+          }
+        });
+      });
+
+      const tempZoneCount = data.gameState.tempZone.length;
+
+      // 更新显示的卡牌数量
+      document.getElementById("tableauFaceDownCount").textContent = tableauFaceDownCount;
+      document.getElementById("tableauFaceUpCount").textContent = tableauFaceUpCount;
+      document.getElementById("tempZoneCount").textContent = tempZoneCount;
     }
   }
 }
+
 
 function createDeck() {
   const suits = ["spade", "club", "diamond", "heart"];
@@ -900,29 +932,37 @@ function renderCards(gameState) {
     });
   });
 
-  gameState.tempZone.forEach((card) => {
+  gameState.tempZone.forEach((card, index) => {
     const cardElement = cards.find((el) => el.dataset.id === card.id.toString());
-
+  
     if (!cardElement) {
       console.error("Card element not found:", card);
       return;
     }
+  
+    // 如果暂存区卡牌数量小于等于50，按照要求设置卡牌位置
+    if (gameState.tempZone.length <= 50) {
+      const stackIndex = Math.floor(index / 10);
+      const cardIndexInStack = index % 10;
+      const xOffset = 10.1; // 你可以根据需要调整每个堆之间的间距
+      const yOffset = 0.5; // 每张卡片在堆中的垂直间距
 
-    cardElement.style.left = initialLeft;
-    cardElement.style.top = initialTop;
-    cardElement.style.zIndex = "0"; // 设置 z-index 为 0，使得暂存区的卡牌始终位于游戏区卡牌之下
-
-
+      console.log(`calc(${initialLeft} + ${stackIndex * xOffset}px)`, `calc(${initialTop } + ${cardIndexInStack * yOffset}px)`)
+  
+      cardElement.style.left = `calc(${initialLeft} + ${stackIndex * xOffset}vw)`;
+      cardElement.style.top = `calc(${initialTop} + ${cardIndexInStack * yOffset}px)`;
+      cardElement.style.zIndex = "0"; // 设置 z-index 为 0，使得暂存区的卡牌始终位于游戏区卡牌之下
+    }
+  
     // 更新卡牌的翻开状态
     card.isSelectable = isCardSelectable(gameState.tableau, card);
     cardElement.classList.toggle("selectable", card.isSelectable);
     cardElement.classList.toggle("selected", card.isSelected);
-
-
+  
     cardElement.classList.toggle("face-up", card.isFaceUp);
     cardElement.classList.toggle("face-down", !card.isFaceUp);
   });
-
+  
 
   // 渲染回收区的卡牌
   gameState.recyclingZone.forEach((card, cardIndex) => {
@@ -934,12 +974,20 @@ function renderCards(gameState) {
     }
 
     // 计算卡牌位置
+    const recyclingZoneSpacing = 0.5; // 可根据需要修改回收区卡牌间距的像素值
+    const stacks = 8;
+    const stackIndex = cardIndex % stacks;
+    const cardInStackIndex = Math.floor(cardIndex / stacks);
+
     const recyclingZoneLeft = 80; // 可根据需要修改回收区距离左侧的百分比
     const recyclingZoneTop = 80; // 可根据需要修改回收区距离顶部的百分比
-    const recyclingZoneSpacing = 1; // 可根据需要修改回收区卡牌间距的像素值
+    const stackSpacing = 3; // 可根据需要修改每个堆之间的距离
 
-    cardElement.style.left = `${recyclingZoneLeft}vw`;
-    cardElement.style.top = `${recyclingZoneTop + cardIndex * recyclingZoneSpacing}vh`;
+    const cardLeft = recyclingZoneLeft + stackIndex * stackSpacing;
+    const cardTop = recyclingZoneTop + cardInStackIndex * recyclingZoneSpacing;
+
+    cardElement.style.left = `${cardLeft}vw`;
+    cardElement.style.top = `${cardTop}vh`;
     cardElement.style.zIndex = `${1000 + cardIndex}`; // 设置较高的 z-index 以确保回收区卡牌显示在顶部
 
     // 更新卡牌的翻开状态
@@ -1014,6 +1062,16 @@ function isGameOver(gameState) {
 
 
 export async function initApp() {
+
+  if (DataStore.isInitialized) {
+    // 应用已初始化，直接返回
+    return;
+  }
+
+  // 将 isInitialized 设置为 true，表示已完成初始化
+  DataStore.isInitialized = true;
+
+
   const uiUpdater = new UIUpdater();
   DataStore.addObserver(uiUpdater);
 
@@ -1034,6 +1092,7 @@ export async function initApp() {
   DataStore.setData("gameState", initialGameState);
   // 绘制初始UI，所有卡牌扣合且在暂存区
   await dealCards([...twoDecks]); // 使用解构来创建卡牌数组的副本
+
 }
 
 document.addEventListener("gameStateInitialized", (event) => {

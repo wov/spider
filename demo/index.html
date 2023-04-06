@@ -12,23 +12,26 @@
     <!-- qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM -->
 
     <main id="main">
-        <div onclick="initApp()">Initialize App</div>
         <div id="cardContainer">
          
         </div>
         <div class="controlContainer">
-
             <div class="controls">
                 <div class="up" id="upButton">上 &#8593;</div>
                 <div class="down" id="downButton">下 &#8595;</div>
                 <div class="left" id="leftButton">左 &#8592;</div>
                 <div class="right" id="rightButton">右 &#8594;</div>
+
+                <div class="confirm" id="confirmMove">确定(enter)</div>
+                <div class="cancel" id="cancelMove">取消(esc)</div>
             </div>
-
-            <div id="confirmMove">确定 enter</div>
-            <div id="cancelMove">取消 esc</div>
-            <div id="deal-cards" class="deal-cards-btn">发牌</div>
-
+            <div id="initializeApp">开始(E)</div>
+            <div id="deal-cards" class="deal-cards-btn">发牌(Q)</div>
+            <div>
+                <p>游戏区扣合的牌：<span id="tableauFaceDownCount"></span></p>
+                <p>游戏区翻开的牌：<span id="tableauFaceUpCount"></span></p>
+                <p>暂存区的牌：<span id="tempZoneCount"></span></p>
+              </div>              
         </div>
 
         <!-- 光标，这里是小蜘蛛 -->

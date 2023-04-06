@@ -221,6 +221,7 @@ div.card.face-down div.front{
     bottom: 80px;
     height: 150px;
     width: 150px;
+    display: none;
 }
 
 .controls > div{
@@ -248,6 +249,39 @@ div.card.face-down div.front{
 .controls .right{
     right: 0;
     top: 33%;
+}
+
+
+.controls .confirm{
+    right: 0;
+    top: 0;
+}
+
+.controls .cancel{
+    right: 0;
+    bottom: 0;
+}
+
+
+#joystick {
+    position: fixed;
+    left: 50%;
+    bottom: 20vh;
+    width: 100px;
+    height: 100px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: -50px;
+}
+
+#thumb {
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 50%;
 }
 
 

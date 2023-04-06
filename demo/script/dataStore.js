@@ -3,6 +3,7 @@ class DataStore {
     constructor() {
       this.data = {};
       this.observers = new Set();
+      this.isInitialized = false;
     }
   
     addObserver(observer) {
