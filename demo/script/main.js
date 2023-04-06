@@ -63,6 +63,7 @@ document.addEventListener("keydown", (event) => {
       moveCursorHorizontal("right");
       break;
     case "enter":
+    case "\\":
       confirmMove();
       break;
     case "escape":
@@ -79,7 +80,6 @@ document.addEventListener("keydown", (event) => {
       break;
   }
 });
-
 
 // 检测游戏手柄的连接
 window.addEventListener("gamepadconnected", (event) => {
@@ -425,6 +425,10 @@ function confirmMove() {
     updateCardCoveredStatus(gameState);
     const movedToRecycling = checkAndMoveSequencesToRecyclingZone(gameState);
 
+    // 更新可能可以翻开的花色
+    const possibleSuitSequences = countPossibleSuitSequences(gameState.tableau);
+    gameState.possibleSuitSequences = possibleSuitSequences;
+
     hasMoved = false;
 
     // 重新渲染卡牌
@@ -532,7 +536,7 @@ function findBestTargetColumn(gameState) {
 // update ui
 class UIUpdater extends Observer {
   update(data) {
-    console.log("Data changed:", data);
+    // console.log("Data changed:", data);
     if (data.hasOwnProperty("gameState")) {
       renderCards(data.gameState);
 
@@ -550,13 +554,41 @@ class UIUpdater extends Observer {
         });
       });
 
-      const tempZoneCount = data.gameState.tempZone.length;
 
-      // 更新显示的卡牌数量
+            // 更新显示的卡牌数量
       document.getElementById("tableauFaceDownCount").textContent = tableauFaceDownCount;
       document.getElementById("tableauFaceUpCount").textContent = tableauFaceUpCount;
-      document.getElementById("tempZoneCount").textContent = tempZoneCount;
+      
+
+      const possibleSuitSequences = countPossibleSuitSequences(data.gameState.tableau);
+      data.gameState.possibleSuitSequences = possibleSuitSequences;
+
+      // 使用辅助函数将花色名称转换为对应的 emoji
+      const possibleSuitSequencesEmoji = possibleSuitSequences.map(suitToEmoji);
+
+      // 更新UI中的可能花色序列计数
+      const possibleSuitSequencesElement = document.getElementById("possible-suit-sequences");
+      if (possibleSuitSequencesElement) {
+        possibleSuitSequencesElement.textContent = `Possible Suit Sequences: ${possibleSuitSequencesEmoji.join(" ")}`;
+      }
+
     }
+  }
+}
+
+
+function suitToEmoji(suit) {
+  switch (suit) {
+    case "spade":
+      return "♠️";
+    case "club":
+      return "♣️";
+    case "heart":
+      return "♥️";
+    case "diamond":
+      return "♦️";
+    default:
+      return "";
   }
 }
 
@@ -696,7 +728,7 @@ async function dealCardsToTableau() {
 
 
 function updateCursorPosition(row, column, gameState) {
-  console.log("updateCursorPosition", row, column, gameState);
+  // console.log("updateCursorPosition", row, column, gameState);
 
   const spider = document.getElementById("spider");
   const silk = document.getElementById("silk");
@@ -947,7 +979,6 @@ function renderCards(gameState) {
       const xOffset = 10.1; // 你可以根据需要调整每个堆之间的间距
       const yOffset = 0.5; // 每张卡片在堆中的垂直间距
 
-      console.log(`calc(${initialLeft} + ${stackIndex * xOffset}px)`, `calc(${initialTop } + ${cardIndexInStack * yOffset}px)`)
   
       cardElement.style.left = `calc(${initialLeft} + ${stackIndex * xOffset}vw)`;
       cardElement.style.top = `calc(${initialTop} + ${cardIndexInStack * yOffset}px)`;
@@ -1087,6 +1118,7 @@ export async function initApp() {
     tableau: Array(10).fill([]),
     tempZone: twoDecks.map((card) => ({ ...card, inTempZone: true, isFaceUp: false })),
     recyclingZone: [], // 回收区
+    possibleSuitSequences: [], // 有没有可回收的花色
   };
   renderInitialCards(initialGameState);
   DataStore.setData("gameState", initialGameState);
@@ -1103,5 +1135,27 @@ document.addEventListener("gameStateInitialized", (event) => {
   initializeCursor(gameState);
 });
 
+// 计算目前可能可以完成的花色。
+function countPossibleSuitSequences(tableau) {
+  const faceUpCards = tableau
+    .flat()
+    .filter((card) => card.isFaceUp);
 
+  const suits = ["spade", "club", "heart", "diamond"];
+  const completeSequences = [];
 
+  suits.forEach((suit) => {
+    const suitCards = faceUpCards.filter((card) => card.suit === suit);
+    const rankCount = Array(13).fill(0);
+
+    suitCards.forEach((card) => {
+      rankCount[cardValue(card.rank) - 1]++;
+    });
+
+    if (rankCount.every((count) => count >= 1)) {
+      completeSequences.push(suit);
+    }
+  });
+
+  return completeSequences;
+}
