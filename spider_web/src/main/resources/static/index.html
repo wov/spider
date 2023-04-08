@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Spider Pocket Demo</title>
+    <!-- <script src="https://unpkg.com/css-doodle"></script> -->
+    <link rel="stylesheet" href="./style/main.css">
+</head>
+<body>
+    <!-- qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM -->
+
+    <main id="main">
+        <div id="cardContainer">
+         
+        </div>
+        <div class="controlContainer">
+            <div class="controls">
+                <div class="up" id="upButton">上 &#8593;</div>
+                <div class="down" id="downButton">下 &#8595;</div>
+                <div class="left" id="leftButton">左 &#8592;</div>
+                <div class="right" id="rightButton">右 &#8594;</div>
+
+                <div class="confirm" id="confirmMove">确定(enter)</div>
+                <div class="cancel" id="cancelMove">取消(esc)</div>
+            </div>
+            <div id="initializeApp">开始(E)</div>
+            <div id="deal-cards" class="deal-cards-btn">发牌(Q)</div>
+            <div>
+                <p>游戏区扣合的牌：<span id="tableauFaceDownCount"></span></p>
+                <p>游戏区翻开的牌：<span id="tableauFaceUpCount"></span></p>
+                <p id="stepCount">Step count: 0</p>
+                <!-- <p>暂存区的牌：<span id="tempZoneCount"></span></p> -->
+              </div>     
+              <div id="possible-suit-sequences">Possible Suit Sequences: 0</div>         
+        </div>
+
+        <!-- 光标，这里是小蜘蛛 -->
+        <div id="cursor">
+            <img id="spider" src="svg/spider.svg" style="position: absolute; top: 0; transform: translate(-50%, -50%);" />
+        </div>
+
+        <!-- 蜘蛛丝 -->
+        <div id="silk" style="position: absolute; width: 2px; background-color: rgba(255, 255, 255, 0.6);"></div>
+    </main>
+
+    <script type="module">
+        import { initApp } from './script/main.js';
+        window.initApp = initApp;
+    </script>
+  
+</body>
+</html>

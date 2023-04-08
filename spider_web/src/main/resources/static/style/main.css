@@ -1,0 +1,319 @@
+:root{
+    --border-color : #979797;
+    --main-bg : #69AE6B;
+    --pure-black : #000;
+    --pure-red: #f00;
+
+    --card-bg: #fff;
+    
+}
+
+
+
+html,body{
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+/* 
+@font-face {font-family: "GeoSlab703 Md BT"; 
+    src: url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.eot");
+    src: url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.eot?#iefix") format("embedded-opentype"),
+    url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.woff2") format("woff2"), 
+    url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.woff") format("woff"),
+    url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.ttf") format("truetype"),
+    url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.svg#GeoSlab703 Md BT") format("svg"); 
+} */
+
+
+p{
+    margin: 0;
+}
+
+html{
+    background-color: var(--main-bg);
+    /* background-image: url('/image/bg.jpg'); */
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
+    font-family: "GeoSlab703 Md BT";
+}
+
+
+main{
+    position: absolute;
+    display: block;
+    width: 100%;
+    min-height: -webkit-fill-available;
+    top: 0;
+    left: 0;
+  
+    background: radial-gradient(circle at top center, rgba(255,255,255,0.2) 0%, rgba(232,232,232,0.2) 32%, rgba(0,0,0,0.2) 100%);
+    /* 空出遮挡区域 */
+    padding: env(safe-area-inset-top, 20px) env(safe-area-inset-right, 20px) env(
+        safe-area-inset-bottom,
+        20px
+    ) env(safe-area-inset-left, 20px);
+    box-sizing: border-box;
+}
+
+css-doodle {
+    width: 80vmin;
+    height: 40vmin;
+    border-radius: 10vmin;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+  
+
+
+
+/* TODO: 这里需要改掉绝对尺寸 */
+.card{
+    display: inline-block;
+    margin: 1px;
+
+    vertical-align: top;
+
+    aspect-ratio: 7 / 10;
+    width: calc(10vw - 3px);
+
+    position: absolute;
+    backface-visibility: hidden;
+
+    transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.card.selected{
+    transform: scale(1.1);
+}
+
+.card .front{
+    backface-visibility: hidden;
+    position: absolute;
+	transform: perspective(400px) rotateY(0deg);
+    width: 100%;
+    height: 100%;
+    transition: 0.5s;
+    background-color: var(--card-bg);
+    border: .5px solid var(--border-color);
+    border-radius: 3px;
+}
+
+.card .back{
+    content: "";
+    position: absolute;
+    display: block;
+    width: 100%;
+    height: 100%;
+
+    left: 0;
+    top: 0;
+    background-image: url('/svg/back.svg');
+    background-size: contain;
+
+    backface-visibility: hidden;
+
+	transform: perspective(400px) rotateY(179.9deg);
+
+    /* transition: 0.5s; */
+
+    transition: transform 0.5s;
+    transform-style: preserve-3d;
+}
+
+div.card.face-down div.back{
+	transform: perspective(400px) rotateY(0);
+}
+
+div.card.face-down div.front{
+	transform: perspective(400px) rotateY(179.9deg);
+}
+
+.card .value{
+    width: 27%;
+    height: 29%;
+    position: absolute;
+    top: 3%;
+    left: 3%;
+}
+
+.card img{
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    vertical-align: top;
+}
+
+
+.card .suit{
+    width: 27%;
+    height: 20%;
+    position: absolute;
+    top: 34%;
+    left: 3%;
+    transition: all 0.3s;
+}
+
+.card.covered .suit{
+    top: 5%;
+    left: 35%;
+}
+
+
+.card .content{
+    width: 57%;
+    height: 64%;
+    position: absolute;
+    right: 6%;
+    bottom: 6%;
+}
+
+/* 默认不可选 */
+.card.face-up:after{
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.card.face-up.selectable::after,
+.card.face-up.selected::after,
+.card.face-up.movable-to::after{
+    display: none;
+}
+
+.card.movable-to{
+    animation: breathe 5s ease-in-out infinite;
+}
+
+
+#cursor {
+    position: absolute;
+    pointer-events: none;
+    z-index: 1002;
+    top: 0;
+}
+
+#spider {
+    width: 8vw;
+    height: auto;
+    transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+#silk{
+    pointer-events: none;
+    z-index: 1001;
+    top: 0;
+    height: 0;
+    transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+
+.controlContainer{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    text-align: right;
+    padding: 10px;
+}
+
+
+.controls{
+    position: absolute;
+    left: 30%;
+    bottom: 80px;
+    height: 150px;
+    width: 150px;
+    display: none;
+}
+
+.controls > div{
+    position: absolute;
+    width: 33%;
+    height: 33%;
+    border: 1px solid red;
+}
+
+.controls .up{
+    left: 33%;
+    top: 0;
+}
+
+.controls .down{
+    left: 33%;
+    bottom: 0;
+}
+
+.controls .left{
+    left: 0;
+    top: 33%;
+}
+
+.controls .right{
+    right: 0;
+    top: 33%;
+}
+
+
+.controls .confirm{
+    right: 0;
+    top: 0;
+}
+
+.controls .cancel{
+    right: 0;
+    bottom: 0;
+}
+
+
+#joystick {
+    position: fixed;
+    left: 50%;
+    bottom: 20vh;
+    width: 100px;
+    height: 100px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: -50px;
+}
+
+#thumb {
+    width: 50px;
+    height: 50px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 50%;
+}
+
+
+
+
+
+@keyframes shake {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    10% { transform: translate(-1px, 1px) rotate(-1deg); }
+    20% { transform: translate(1px, -1px) rotate(1deg); }
+    30% { transform: translate(-1px, 1px) rotate(-1deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 1px) rotate(-1deg); }
+    60% { transform: translate(1px, -1px) rotate(1deg); }
+    70% { transform: translate(-1px, 1px) rotate(-1deg); }
+    80% { transform: translate(1px, -1px) rotate(1deg); }
+    90% { transform: translate(-1px, 1px) rotate(-1deg); }
+  }
+
+
+  /* 创建关键帧动画 */
+  @keyframes breathe {
+    0%, 100% {
+      box-shadow: 0 0 5px rgba(255, 255, 0, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 15px rgba(255, 255, 0, 1);
+    }
+  }
