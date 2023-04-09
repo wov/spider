@@ -28,6 +28,8 @@ html,body{
 } */
 
 
+
+
 p{
     margin: 0;
 }
@@ -57,6 +59,16 @@ main{
         20px
     ) env(safe-area-inset-left, 20px);
     box-sizing: border-box;
+}
+
+#spiderWeb{
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    transform: translate(-30%,-30%);
+    width: 80vw;
+    height: auto;
 }
 
 css-doodle {
