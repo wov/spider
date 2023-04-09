@@ -633,6 +633,8 @@ async function dealCards(cards) {
   const tempZone = []; // 暂存区
   const recyclingZone = []; // 回收区
   const numColumns = 10;
+  const possibleSuitSequences = []; // 有没有可回收的花色
+
 
   // 初始化游戏区
   for (let i = 0; i < numColumns; i++) {
@@ -662,6 +664,7 @@ async function dealCards(cards) {
         tempZone,
         recyclingZone,
         stepCount: 0, // 初始化步数为 0
+        possibleSuitSequences,
       };
       DataStore.setData("gameState", gameState);
 
@@ -688,7 +691,8 @@ async function dealCards(cards) {
     tableau,
     tempZone,
     recyclingZone,
-    stepCount: 0, // 初始化步数为 0
+    stepCount: 0, // 初始化步数为 0,
+    possibleSuitSequences,
   };
 
   // 触发 gameStateInitialized 事件
@@ -702,6 +706,8 @@ async function dealCards(cards) {
 async function dealCardsToTableau() {
   // 获取游戏状态
   const gameState = DataStore.getData("gameState");
+
+  if(!gameState){return;}
 
   // 将暂存区中的前 10 张牌分发到游戏区的每一列
   for (let i = 0; i < 10; i++) {
