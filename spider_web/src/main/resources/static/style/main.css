@@ -122,7 +122,7 @@ css-doodle {
 
     left: 0;
     top: 0;
-    background-image: url('/svg/back.svg');
+    background-image: url('../svg/back.svg');
     background-size: contain;
 
     backface-visibility: hidden;

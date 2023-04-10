@@ -1,0 +1,8 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://54.250.43.216:3306/Spider?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true
+    username: spider
+    password: spider@2023
