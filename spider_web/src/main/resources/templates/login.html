@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>login/register</title>
+    <link rel="shortcut icon" href="../static/image/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../static/style/login.css">
+
+    <script src="../static/script/jquery-1.12.4.js"></script>
+    <script>
+        function login(){
+            $.ajax({
+                type:"post",            //请求方式
+                url:"/spider/passport/login1",     //路径
+                async:true,             //是否异步
+                dataType:"json",        //返回数据的格式
+                params: {},
+                success:function(res){  //成功的回调函数
+                    console.log(res);    //res代表返回的数据，可以随心所欲处理数据啦
+                    window.location.href="/spider/index";
+                }
+            })
+        }
+
+        function register(){
+            $.ajax({
+                type:"post",                //请求方式
+                url:"/spider/register",     //路径
+                async:true,                 //是否异步
+                dataType:"json",            //返回数据的格式
+                success:function(res){      //成功的回调函数
+                    console.log(res);       //res代表返回的数据，可以随心所欲处理数据啦
+                }
+            })
+        }
+
+    </script>
+</head>
+
+<body>
+<!-- login/register container -->
+<div class="container">
+    <!-- register -->
+    <div class="form-container sign-up-container">
+        <div class="form">
+            <input type="text" name="username" id="username" placeholder="用户名">
+            <input type="email" name="emal" id="email" placeholder="邮箱">
+            <input type="password" name="password" id="password" placeholder="密码">
+            <input type="password" name="againPassword" id="againPassword" placeholder="确认密码">
+            <button id="registerBtn" class="signUp" onclick="register()">注册</button>
+        </div>
+    </div>
+    <!-- login -->
+    <div class="form-container sign-in-container">
+        <div class="form">
+            <input type="email" name="emal" id="email" placeholder="邮箱">
+            <input type="password" name="password" id="password" placeholder="密码">
+            <a href="#" class="forget-password">忘记你的密码</a>
+            <button id="loginBtn" class="signIn" onclick="login()">登录</button>
+        </div>
+    </div>
+    <!-- overlay container -->
+    <div class="overlay_container">
+        <div class="overlay">
+            <!-- overlay left -->
+            <div class="overlay_panel overlay_left_container">
+                <h2>已有账号</h2>
+                <button id="sign-in">登录</button>
+            </div>
+            <!-- overlay right -->
+            <div class="overlay_panel overlay_right_container">
+                <h2>新玩家注册</h2>
+                <button id="sign-up">注册</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../static/script/login.js"></script>
+</body>
+
+</html>

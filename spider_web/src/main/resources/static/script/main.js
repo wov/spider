@@ -917,13 +917,13 @@ function renderCard(card) {
       <div class="card ${card.isFaceUp ? 'face-up' : 'face-down'}" data-id="${card.id}" data-value="${card.rank}" data-suit="${card.suit}">
         <div class="front">
           <div class="value">
-            <img src="./svg/${card.rank}_${color}.svg"></img>
+            <img src="../static/svg/${card.rank}_${color}.svg"></img>
           </div>
           <div class="suit">
-            <img src="./svg/${card.suit}.svg"></img>
+            <img src="../static/svg/${card.suit}.svg"></img>
           </div>
           <div class="content">
-            <img src="./svg/${card.suit}_${card.rank}_content.svg" />
+            <img src="../static/svg/${card.suit}_${card.rank}_content.svg" />
           </div>
         </div>
         <div class="back"></div>
