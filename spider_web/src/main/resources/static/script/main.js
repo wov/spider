@@ -563,17 +563,32 @@ class UIUpdater extends Observer {
       // 更新步数
       document.getElementById("stepCount").textContent = `Step count: ${data.gameState.stepCount}`;
 
+
+
       const possibleSuitSequences = countPossibleSuitSequences(data.gameState.tableau);
       data.gameState.possibleSuitSequences = possibleSuitSequences;
 
       // 使用辅助函数将花色名称转换为对应的 emoji
       const possibleSuitSequencesEmoji = possibleSuitSequences.map(suitToEmoji);
 
+      // 比较新旧状态的 possibleSuitSequences 并找出新加入的值
+      const newSequences = possibleSuitSequences.filter(
+        (sequence) => !this.previousSuitSequences.includes(sequence)
+      );
+      if (newSequences.length > 0) {
+        // 将新加入的花色转换为对应的 emoji
+        const newSequencesEmoji = newSequences.map(suitToEmoji);
+        alert(`Newly added suit sequences: ${newSequencesEmoji.join(" ")}`);
+      }
+
       // 更新UI中的可能花色序列计数
       const possibleSuitSequencesElement = document.getElementById("possible-suit-sequences");
       if (possibleSuitSequencesElement) {
         possibleSuitSequencesElement.textContent = `Possible Suit Sequences: ${possibleSuitSequencesEmoji.join(" ")}`;
       }
+
+      // 更新 previousSuitSequences 以便下次比较
+      this.previousSuitSequences = possibleSuitSequences;
 
     }
   }
