@@ -590,6 +590,12 @@ class UIUpdater extends Observer {
       // 更新 previousSuitSequences 以便下次比较
       this.previousSuitSequences = possibleSuitSequences;
 
+      const isgameover = isGameOver(data.gameState);
+
+      if(isgameover){
+        alert(`You Win! /n your step is :  ${data.gameState.stepCount}`)
+      }
+
     }
   }
 }
@@ -971,6 +977,7 @@ function renderCards(gameState) {
       cardElement.style.left = `${columnIndex * 10}vw`;
       cardElement.style.top = `${cardIndex * 15}px`;
       cardElement.style.zIndex = `${cardIndex + 1}`; // 设置 z-index
+
 
       // 更新卡牌的翻开状态
       cardElement.classList.toggle("face-up", card.isFaceUp);
