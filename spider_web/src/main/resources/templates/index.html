@@ -6,13 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Spider Pocket Demo</title>
     <!-- <script src="https://unpkg.com/css-doodle"></script> -->
-    <link rel="stylesheet" href="./style/main.css">
+    <link rel="stylesheet" href="../static/style/main.css">
 </head>
 <body>
     <!-- qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM -->
 
     <main id="main">
-        <img id="spiderWeb" src="svg/spiderweb.svg" />          
+        <img id="spiderWeb" src="../static/svg/spiderweb.svg" />
         <div id="cardContainer">
          
         </div>
@@ -38,7 +38,7 @@
 
         <!-- 光标，这里是小蜘蛛 -->
         <div id="cursor">
-            <img id="spider" src="svg/spider.svg" style="position: absolute; top: 0; transform: translate(-50%, -50%);" />
+            <img id="spider" src="../static/svg/spider.svg" style="position: absolute; top: 0; transform: translate(-50%, -50%);" />
         </div>
 
         <!-- 蜘蛛丝 -->
@@ -46,7 +46,7 @@
     </main>
 
     <script type="module">
-        import { initApp } from './script/main.js';
+        import { initApp } from '../static/script/main.js';
         window.initApp = initApp;
     </script>
   
