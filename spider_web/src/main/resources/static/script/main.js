@@ -407,7 +407,7 @@ function handleTouchMove(event) {
   } else {
     // 垂直移动
     if (!hasMovedToOtherColumn) {
-      const steps = Math.floor(Math.abs(deltaY) / 10);
+      const steps = Math.floor(Math.abs(deltaY) / 15);
       for (let i = 0; i < steps; i++) {
         if (deltaY > 0) {
           moveCursor("down");
