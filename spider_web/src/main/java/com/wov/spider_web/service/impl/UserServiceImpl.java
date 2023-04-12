@@ -1,11 +1,13 @@
 package com.wov.spider_web.service.impl;
 
+import com.wov.spider_web.enums.Sex;
 import com.wov.spider_web.mapper.UsersMapper;
 import com.wov.spider_web.pojo.Users;
 import com.wov.spider_web.pojo.bo.UserBO;
 import com.wov.spider_web.service.UserService;
 import com.wov.spider_web.util.DateUtil;
 import com.wov.spider_web.util.MD5Utils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -14,16 +16,14 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
 
     @Autowired
     public UsersMapper usersMapper;
 
-    /*@Autowired
-    private Sid sid;*/
-
-    private static final String USER_FACE = "http://122.152.205.72:88/group1/M00/00/05/CpoxxFw_8_qAIlFXAAAcIhVPdSg994.png";
+    private static final String USER_FACE = "";
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
@@ -42,11 +42,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public Users createUser(UserBO userBO) {
-
-        String userId = "1111";
-
         Users user = new Users();
-        user.setId(userId);
         user.setUsername(userBO.getUsername());
         try {
             user.setPassword(MD5Utils.getMD5Str(userBO.getPassword()));
@@ -60,12 +56,13 @@ public class UserServiceImpl implements UserService {
         // 默认生日
         user.setBirthday(DateUtil.stringToDate("1900-01-01"));
         // 默认性别为 保密
-        //user.setSex(Sex.secret.type);
+        user.setSex(Sex.secret.type);
 
         user.setCreatedTime(new Date());
         user.setUpdatedTime(new Date());
 
         usersMapper.insert(user);
+        log.info(String.format("%s成功注册",user.getUsername()));
 
         return user;
     }
@@ -73,12 +70,6 @@ public class UserServiceImpl implements UserService {
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
     public Users queryUserForLogin(String username, String password) {
-
-//        try {
-//            Thread.sleep(2500);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
 
         Example userExample = new Example(Users.class);
         Example.Criteria userCriteria = userExample.createCriteria();
