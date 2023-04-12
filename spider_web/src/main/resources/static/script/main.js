@@ -17,6 +17,8 @@ let selectedCard = null;
 
 let hasMoved = false;
 
+let touchStartX;
+let touchStartY;
 
 // 获取按钮元素
 const upButton = document.getElementById("upButton");
@@ -179,14 +181,11 @@ function updateGamepadStatus() {
 // 在主循环中调用 updateGamepadStatus
 function gameLoop() {
   updateGamepadStatus();
-
   // 其他游戏循环逻辑
-
   requestAnimationFrame(gameLoop);
 }
 
 gameLoop();
-
 
 // 开始更新游戏手柄状态
 updateGamepadStatus();
@@ -320,7 +319,129 @@ function moveCursorHorizontal(direction) {
   }
 }
 
+
+let initialCursorColumn = -1;
+
+function handleTouchStart(event) {
+  event.preventDefault();
+
+  touchStartX = event.touches[0].clientX;
+  touchStartY = event.touches[0].clientY;
+
+  const touchZone = event.currentTarget;
+  const columnIndex = parseInt(touchZone.dataset.columnIndex, 10);
+
+  gameState = DataStore.getData("gameState");
+  const tableau = gameState.tableau;
+
+  if (!selectedCard) {
+    // 如果没有选中卡牌，直接移动光标
+    cursorColumn = columnIndex;
+
+    // 寻找可选卡牌
+    let counter = 0;
+    while (!columnHasSelectableCard(tableau, cursorColumn) && counter < 10) {
+      cursorColumn += 1;
+      if (cursorColumn > 9) {
+        cursorColumn = 0;
+      }
+      counter++;
+    }
+
+    initialCursorColumn = cursorColumn;
+    // 默认选择一个，移动起来快。
+    // moveCursor("up");
+
+    if (counter < 10) {
+      cursorRow = -1;
+      updateCursorPosition(cursorRow, cursorColumn, gameState);
+    }
+  }
+}
+
+
+
+function previewMoveToColumn(column) {
+  if (selectedCard) {
+    hasMoved = true;
+    cursorColumn = column;
+    gameState = DataStore.getData("gameState");
+    previewMove(cursorRow, cursorColumn, gameState);
+  }
+}
+
+function isValidMoveToColumn(tableau, columnIndex, selectedCard) {
+  const targetColumn = tableau[columnIndex];
+  const topCard = targetColumn[targetColumn.length - 1];
+
+  // 如果目标列为空或顶部卡牌比选中卡牌大1，则允许移动
+  return !topCard || cardValue(topCard.rank) === cardValue(selectedCard.rank) + 1;
+}
+
+
+function handleTouchMove(event) {
+  event.preventDefault();
+
+  const touchMoveX = event.touches[0].clientX;
+  const touchMoveY = event.touches[0].clientY;
+  const deltaX = touchMoveX - touchStartX;
+  const deltaY = touchMoveY - touchStartY;
+
+  const newCursorColumn = getColumnIndexFromTouchPosition(touchMoveX, touchMoveY);
+  let hasMovedToOtherColumn = false;
+  if (newCursorColumn !== -1) {
+    hasMovedToOtherColumn = initialCursorColumn !== newCursorColumn;
+    if (hasMovedToOtherColumn) {
+      const tableau = DataStore.getData("gameState").tableau;
+      const targetColumn = tableau[newCursorColumn];
+      const topCard = targetColumn[targetColumn.length - 1];
+
+      if ( selectedCard && ( !topCard || cardValue(topCard.rank) === cardValue(selectedCard.rank) + 1)) {
+        previewMoveToColumn(newCursorColumn);
+      }
+    }
+  }
+
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    // 水平移动
+  } else {
+    // 垂直移动
+    if (!hasMovedToOtherColumn) {
+      const steps = Math.floor(Math.abs(deltaY) / 10);
+      for (let i = 0; i < steps; i++) {
+        if (deltaY > 0) {
+          moveCursor("down");
+        } else {
+          moveCursor("up");
+        }
+      }
+      touchStartY += steps * 10 * (deltaY > 0 ? 1 : -1);
+    }
+  }
+}
+
+
+function handleTouchEnd(event) {
+  event.preventDefault();
+  confirmMove();
+}
+
+function getColumnIndexFromTouchPosition(x, y) {
+  const touchZoneElements = document.querySelectorAll(".touchControlColumn");
+  for (const touchZoneElement of touchZoneElements) {
+    const rect = touchZoneElement.getBoundingClientRect();
+    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+      console.log(parseInt(touchZoneElement.dataset.columnIndex, 10))
+      return parseInt(touchZoneElement.dataset.columnIndex, 10);
+    }
+  }
+  return -1;
+}
+
+
 function previewMove(row, column, gameState) {
+
+  console.log(row, column)
 
   // 更新光标位置
   cursorRow = row;
@@ -350,6 +471,12 @@ function previewMove(row, column, gameState) {
 
 function columnHasSelectableCard(tableau, columnIndex) {
   const column = tableau[columnIndex];
+
+  // 如果 column 不存在或不是数组，直接返回 false
+  if (!column || !Array.isArray(column)) {
+    return false;
+  }
+
   for (const card of column) {
     if (isCardSelectable(tableau, card)) {
       return true;
@@ -398,13 +525,6 @@ function confirmMove() {
         }
       }
     });
-
-    // if (gameState.tableau[fromColumnIndex].length > 0) {
-    //   const topCard = gameState.tableau[fromColumnIndex][gameState.tableau[fromColumnIndex].length - 1];
-    //   if (!topCard.isFaceUp) {
-    //     topCard.isFaceUp = true;
-    //   }
-    // }
 
     // 取消选中的卡牌
     movingCards.forEach((card) => {
@@ -482,9 +602,6 @@ function moveSelectedCardsToColumn(gameState, targetColumn) {
       cardElement.style.top = `${(gameState.tableau[targetColumn].length - movingCards.length + index) * 15}px`;
     }
   });
-
-
-
 }
 
 
@@ -760,8 +877,6 @@ async function dealCardsToTableau() {
 
 
 function updateCursorPosition(row, column, gameState) {
-  // console.log("updateCursorPosition", row, column, gameState);
-
   const spider = document.getElementById("spider");
   const silk = document.getElementById("silk");
 
@@ -868,10 +983,11 @@ function isCardSelectable(tableau, card) {
 }
 
 
-
 function updateMovableToCards(tableau, selectedCard) {
+  const movableToColumns = [];
+
   if (selectedCard) {
-    tableau.forEach((column) => {
+    tableau.forEach((column, columnIndex) => {
       if (!column.some((c) => c.id === selectedCard.id)) {
         const topCard = column[column.length - 1];
         if (topCard) {
@@ -880,9 +996,13 @@ function updateMovableToCards(tableau, selectedCard) {
             cardValue(topCard.rank) === cardValue(selectedCard.rank) + 1
           ) {
             topCard.isMovableTo = true;
+            movableToColumns.push(columnIndex);
           } else {
             topCard.isMovableTo = false;
           }
+        } else {
+          // 如果列为空，将其添加到可移动到的列数组中
+          movableToColumns.push(columnIndex);
         }
       }
     });
@@ -894,9 +1014,8 @@ function updateMovableToCards(tableau, selectedCard) {
       }
     });
   }
+  return movableToColumns;
 }
-
-
 
 // 辅助函数，将卡牌等级转换为数字，以便于比较大小
 function cardValue(rank) {
@@ -950,16 +1069,30 @@ function updateCardCoveredStatus(gameState) {
   });
 }
 
-
 function renderInitialCards(gameState) {
   const cardContainer = document.getElementById("cardContainer");
+  const touchControlContainer = document.getElementById("touchControlContainer");
 
   gameState.tempZone.forEach((card) => {
     const cardElement = renderCard(card);
     cardContainer.appendChild(cardElement);
   });
-}
 
+  for (let i = 0; i < 10; i++) {
+    const xOffset = 10.1; // 你可以根据需要调整每个堆之间的间距
+    const touchControlColumn = document.createElement("div");
+    touchControlColumn.id = `touchControlColumn-${i}`;
+    touchControlColumn.classList.add("touchControlColumn");
+    touchControlColumn.style.left = `calc(${initialLeft} + ${i * xOffset}vw)`;
+    touchControlColumn.dataset.columnIndex = i; 
+
+    touchControlColumn.addEventListener("touchstart", handleTouchStart);
+    touchControlColumn.addEventListener("touchmove", handleTouchMove);
+    touchControlColumn.addEventListener("touchend", handleTouchEnd);
+
+    touchControlContainer.appendChild(touchControlColumn);
+  }
+}
 
 function renderCards(gameState) {
   const cardContainer = document.getElementById("cardContainer");
@@ -1027,7 +1160,6 @@ function renderCards(gameState) {
     cardElement.classList.toggle("face-down", !card.isFaceUp);
   });
   
-
   // 渲染回收区的卡牌
   gameState.recyclingZone.forEach((card, cardIndex) => {
     const cardElement = cards.find((el) => el.dataset.id === card.id.toString());
@@ -1061,6 +1193,19 @@ function renderCards(gameState) {
     // 移除回收区卡牌的可选、选中和可移动到状态
     cardElement.classList.remove("selectable", "selected", "movable-to");
   });
+
+
+  const selectedCard = gameState.tableau
+    .flat()
+    .find((card) => card.isSelected);
+  const movableToColumns = updateMovableToCards(gameState.tableau, selectedCard);
+
+  // 渲染触控区域 
+  for (let i = 0; i < 10; i++) {
+    const touchControlColumn = document.getElementById(`touchControlColumn-${i}`);
+    touchControlColumn.classList.toggle("selectable", columnHasSelectableCard(gameState.tableau, i));
+    touchControlColumn.classList.toggle("movable-to", movableToColumns.includes(i));
+  }
 
 }
 

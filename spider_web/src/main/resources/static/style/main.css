@@ -3,9 +3,7 @@
     --main-bg : #69AE6B;
     --pure-black : #000;
     --pure-red: #f00;
-
-    --card-bg: #fff;
-    
+    --card-bg: #fff;   
 }
 
 
@@ -81,6 +79,10 @@ css-doodle {
 
 .cardContainer{
     perspective: 1000px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
 }
 
 
@@ -202,6 +204,30 @@ div.card.face-down div.front{
 
 .card.movable-to{
     animation: breathe 5s ease-in-out infinite;
+}
+
+
+#touchControlContainer{
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#touchControlContainer .touchControlColumn{
+    position: absolute;
+    width: calc(10vw - 3px);
+    height: 78vh;
+}
+
+#touchControlContainer .touchControlColumn.selectable{
+    background-image: linear-gradient(180deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.30) 99%);
+    /* box-shadow: inset 0 20px 20px 0 rgba(247,247,247,0.59); */
+}
+
+#touchControlContainer .touchControlColumn.movable-to{
+    background-color: rgba(238, 238, 22, 0.1);
 }
 
 
