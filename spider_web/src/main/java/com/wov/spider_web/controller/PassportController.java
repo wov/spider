@@ -90,11 +90,6 @@ public class PassportController {
         return SpiderJsonResult.ok();
     }
 
-    @PostMapping("/login1")
-    public SpiderJsonResult login(){
-        return SpiderJsonResult.ok();
-    }
-
     @PostMapping("/login")
     public SpiderJsonResult login(@RequestBody UserBO userBO,
                                   HttpServletRequest request,
