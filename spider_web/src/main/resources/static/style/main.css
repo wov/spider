@@ -217,12 +217,17 @@ div.card.face-down div.front{
     top: 0;
     width: 100%;
     height: 100%;
+    box-sizing: border-box;
 }
 
 #touchControlContainer .touchControlColumn{
     position: absolute;
     width: calc(10vw - 3px);
     height: 100%;
+}
+
+#touchControlContainer .touchControlColumn.over{
+    border: solid 1px rgba(255,255,255,0.5);
 }
 
 #touchControlContainer .touchControlColumn.selectable{
@@ -342,8 +347,9 @@ div.card.face-down div.front{
     border-radius: 50%;
 }
 
-
-
+.info{
+    pointer-events: none;
+}
 
 
 @keyframes shake {

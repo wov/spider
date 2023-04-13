@@ -317,6 +317,7 @@ function moveCursorHorizontal(direction) {
   }
 }
 
+let initialCursorColumn = -1;
 
 function handleTouchStart(event) {
   event.preventDefault();
@@ -364,9 +365,13 @@ function handleTouchStart(event) {
       }
     }
 
+    initialCursorColumn = cursorColumn;
+    
 
     if (cursorColumn !== -1) {
       cursorRow = -1;
+      moveCursor("up");
+
       updateCursorPosition(cursorRow, cursorColumn, gameState);
     }
   }
@@ -385,6 +390,15 @@ function getColumnCenterPosition(columnIndex) {
 
 let hasMovedHorizontally = false;
 
+function previewMoveToColumn(column) {
+  if (selectedCard) {
+    hasMoved = true;
+    cursorColumn = column;
+    gameState = DataStore.getData("gameState");
+    previewMove(cursorRow, cursorColumn, gameState);
+  }
+}
+
 function handleTouchMove(event) {
   event.preventDefault();
   const touchMoveX = event.touches[0].clientX;
@@ -392,40 +406,49 @@ function handleTouchMove(event) {
   const deltaX = touchMoveX - touchStartX;
   const deltaY = touchMoveY - touchStartY;
 
+  const newCursorColumn = getColumnIndexFromTouchPosition(touchMoveX, touchMoveY);
+  let hasMovedToOtherColumn = false;
+  if (newCursorColumn !== -1) {
+    hasMovedToOtherColumn = initialCursorColumn !== newCursorColumn;
+    if (hasMovedToOtherColumn) {
+      const tableau = DataStore.getData("gameState").tableau;
+      const targetColumn = tableau[newCursorColumn];
+      const topCard = targetColumn[targetColumn.length - 1];
+
+      if ( selectedCard && ( !topCard || cardValue(topCard.rank) === cardValue(selectedCard.rank) + 1)) {
+        previewMoveToColumn(newCursorColumn);
+      }
+    }
+  }
 
   if (Math.abs(deltaX) > Math.abs(deltaY)) {
     // 水平移动
-    // const steps = Math.floor(Math.abs(deltaX) / 30);
-    // for (let i = 0; i < steps; i++) {
-      if (deltaX > 30) {
-        moveCursorHorizontal("right");
-        touchStartX = touchMoveX;
-        hasMovedHorizontally = true;
-      } else if (deltaX < -30) {
-        moveCursorHorizontal("left");
-        touchStartX = touchMoveX;
-        hasMovedHorizontally = true;
-      }
-    // }
-    // touchStartX += steps * 10 * (deltaX > 0 ? 1 : -1);
-  } 
-  
-  if (!hasMovedHorizontally) {
+  } else if (!hasMovedToOtherColumn) {
     // 垂直移动
-    // const steps = Math.floor(Math.abs(deltaY) / 30);
-    // for (let i = 0; i < steps; i++) {
-      if (deltaY > 30) {
+      if (deltaY > 40) {
         moveCursor("down");
         touchStartY = touchMoveY;
-      } else if (deltaY < -10) {
+      } else if (deltaY < -5) {
         moveCursor("up");
         touchStartY = touchMoveY;
       }
-    // }
-    // touchStartY += steps * 10 * (deltaY > 0 ? 1 : -1);
   }
 }
 
+function getColumnIndexFromTouchPosition(x, y) {
+  const touchZoneElements = document.querySelectorAll(".touchControlColumn");
+  for (const touchZoneElement of touchZoneElements) {
+    const rect = touchZoneElement.getBoundingClientRect();
+    touchZoneElement.classList.remove('over');
+    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+      if(touchZoneElement.classList.contains('movable-to')){
+          touchZoneElement.classList.add('over');
+      }
+      return parseInt(touchZoneElement.dataset.columnIndex, 10);
+    }
+  }
+  return -1;
+}
 
 function handleTouchEnd(event) {
   event.preventDefault();
@@ -672,11 +695,12 @@ class UIUpdater extends Observer {
 
 
       // 更新显示的卡牌数量
-      document.getElementById("tableauFaceDownCount").textContent = tableauFaceDownCount;
-      document.getElementById("tableauFaceUpCount").textContent = tableauFaceUpCount;
+      // document.getElementById("tableauFaceDownCount").textContent = tableauFaceDownCount;
+      // document.getElementById("tableauFaceUpCount").textContent = tableauFaceUpCount;
 
       // 更新步数
       document.getElementById("stepCount").textContent = `Step count: ${data.gameState.stepCount}`;
+
       const possibleSuitSequences = countPossibleSuitSequences(data.gameState.tableau);
       data.gameState.possibleSuitSequences = possibleSuitSequences;
 
