@@ -329,35 +329,65 @@ function handleTouchStart(event) {
   touchStartY = event.touches[0].clientY;
 
   const touchZone = event.currentTarget;
-  const columnIndex = parseInt(touchZone.dataset.columnIndex, 10);
+  let columnIndex = parseInt(touchZone.dataset.columnIndex, 10);
 
   gameState = DataStore.getData("gameState");
   const tableau = gameState.tableau;
 
   if (!selectedCard) {
-    // 如果没有选中卡牌，直接移动光标
+    // 如果没有选中卡牌，先将光标移动到当前列
     cursorColumn = columnIndex;
 
-    // 寻找可选卡牌
-    let counter = 0;
-    while (!columnHasSelectableCard(tableau, cursorColumn) && counter < 10) {
-      cursorColumn += 1;
-      if (cursorColumn > 9) {
-        cursorColumn = 0;
+    // 如果当前列不可选，寻找距离点击位置最近的可选列
+    if (!columnHasSelectableCard(tableau, cursorColumn)) {
+      const candidateColumns = [
+        (cursorColumn - 1 + 10) % 10,
+        (cursorColumn + 1) % 10
+      ];
+
+      let minDistanceColumn = -1;
+      let minDistance = Number.MAX_VALUE;
+
+      for (const candidateColumn of candidateColumns) {
+        if (columnHasSelectableCard(tableau, candidateColumn)) {
+          const candidateColumnCenterPosition = getColumnCenterPosition(candidateColumn);
+          const candidateColumnDistance = Math.abs(touchStartX - candidateColumnCenterPosition);
+
+          // 添加一个距离阈值来确保相邻列之间的距离足够近
+          if (candidateColumnDistance < minDistance && candidateColumnDistance < 0.15 * window.innerWidth) {
+            minDistanceColumn = candidateColumn;
+            minDistance = candidateColumnDistance;
+          }
+        }
       }
-      counter++;
+
+      if (minDistanceColumn !== -1) {
+        cursorColumn = minDistanceColumn;
+      } else {
+        cursorColumn = -1; // 如果没有找到可选的列，将光标列设为 -1
+      }
     }
 
     initialCursorColumn = cursorColumn;
-    // 默认选择一个，移动起来快。
-    // moveCursor("up");
 
-    if (counter < 10) {
+    if (cursorColumn !== -1) {
       cursorRow = -1;
       updateCursorPosition(cursorRow, cursorColumn, gameState);
     }
   }
 }
+
+
+function getColumnCenterPosition(columnIndex) {
+  const columnElement = document.querySelector(`.touchControlColumn[data-column-index="${columnIndex}"]`);
+  if (columnElement) {
+    const columnRect = columnElement.getBoundingClientRect();
+    return columnRect.left + columnRect.width / 2;
+  } else {
+    return 0;
+  }
+}
+
 
 
 
@@ -370,18 +400,8 @@ function previewMoveToColumn(column) {
   }
 }
 
-function isValidMoveToColumn(tableau, columnIndex, selectedCard) {
-  const targetColumn = tableau[columnIndex];
-  const topCard = targetColumn[targetColumn.length - 1];
-
-  // 如果目标列为空或顶部卡牌比选中卡牌大1，则允许移动
-  return !topCard || cardValue(topCard.rank) === cardValue(selectedCard.rank) + 1;
-}
-
-
 function handleTouchMove(event) {
   event.preventDefault();
-
   const touchMoveX = event.touches[0].clientX;
   const touchMoveY = event.touches[0].clientY;
   const deltaX = touchMoveX - touchStartX;
@@ -407,7 +427,7 @@ function handleTouchMove(event) {
   } else {
     // 垂直移动
     if (!hasMovedToOtherColumn) {
-      const steps = Math.floor(Math.abs(deltaY) / 15);
+      const steps = Math.floor(Math.abs(deltaY) / 30);
       for (let i = 0; i < steps; i++) {
         if (deltaY > 0) {
           moveCursor("down");
@@ -423,7 +443,13 @@ function handleTouchMove(event) {
 
 function handleTouchEnd(event) {
   event.preventDefault();
-  confirmMove();
+  if(hasMoved){
+    confirmMove();
+  }else{
+    cancelMove();
+  }
+
+  hasMoved = false;
 }
 
 function getColumnIndexFromTouchPosition(x, y) {
@@ -1177,14 +1203,14 @@ function renderCards(gameState) {
 
     const recyclingZoneLeft = 80; // 可根据需要修改回收区距离左侧的百分比
     const recyclingZoneTop = 80; // 可根据需要修改回收区距离顶部的百分比
-    const stackSpacing = 3; // 可根据需要修改每个堆之间的距离
+    const stackSpacing = 0; // 可根据需要修改每个堆之间的距离
 
     const cardLeft = recyclingZoneLeft + stackIndex * stackSpacing;
     const cardTop = recyclingZoneTop + cardInStackIndex * recyclingZoneSpacing;
 
     cardElement.style.left = `${cardLeft}vw`;
     cardElement.style.top = `${cardTop}vh`;
-    cardElement.style.zIndex = `${1000 + cardIndex}`; // 设置较高的 z-index 以确保回收区卡牌显示在顶部
+    cardElement.style.zIndex = 0; // 设置较高的 z-index 以确保回收区卡牌显示在顶部
 
     // 更新卡牌的翻开状态
     cardElement.classList.toggle("face-up", card.isFaceUp);

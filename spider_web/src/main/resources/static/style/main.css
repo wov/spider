@@ -14,6 +14,13 @@ html,body{
     margin: 0;
     padding: 0;
     overflow: hidden;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 /* 
 @font-face {font-family: "GeoSlab703 Md BT"; 
@@ -24,9 +31,6 @@ html,body{
     url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.ttf") format("truetype"),
     url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.svg#GeoSlab703 Md BT") format("svg"); 
 } */
-
-
-
 
 p{
     margin: 0;
@@ -218,7 +222,7 @@ div.card.face-down div.front{
 #touchControlContainer .touchControlColumn{
     position: absolute;
     width: calc(10vw - 3px);
-    height: 78vh;
+    height: 100%;
 }
 
 #touchControlContainer .touchControlColumn.selectable{
@@ -261,6 +265,13 @@ div.card.face-down div.front{
     padding: 10px;
 }
 
+.controlContainer div{
+    display: inline-block;
+    padding: 10px;
+    z-index: 2000;
+    user-select: none;
+}
+
 
 .controls{
     position: absolute;
@@ -268,7 +279,7 @@ div.card.face-down div.front{
     bottom: 80px;
     height: 150px;
     width: 150px;
-    display: none;
+    display: none!important;
 }
 
 .controls > div{
