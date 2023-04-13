@@ -205,7 +205,6 @@ function moveCursor(direction) {
       let nextRow = cursorRow - 1;
       let nextCard = gameState.tableau[cursorColumn][nextRow];
 
-      // 继续向上查找，直到找到一个可选的卡牌或者没有可选的卡牌为止
       while (nextRow >= 0 && (!nextCard || !isCardSelectable(gameState.tableau, nextCard))) {
         nextRow--;
         nextCard = gameState.tableau[cursorColumn][nextRow];
@@ -220,11 +219,10 @@ function moveCursor(direction) {
         selectedCard.isSelected = true;
       }
     }
-  } else if (direction === "down") {
+  } else if (direction === "down" && cursorRow !== -1) { // 添加了对 cursorRow 的检查
     let nextRow = cursorRow + 1;
     let nextCard = gameState.tableau[cursorColumn][nextRow];
 
-    // 继续向下查找，直到找到一个可选的卡牌或者没有可选的卡牌为止
     while (nextRow < gameState.tableau[cursorColumn].length && (!nextCard || !isCardSelectable(gameState.tableau, nextCard))) {
       nextRow++;
       nextCard = gameState.tableau[cursorColumn][nextRow];
@@ -246,11 +244,11 @@ function moveCursor(direction) {
     }
   }
 
-  // 更新游标位置后，请确保更新卡牌的可移动到状态
   updateMovableToCards(gameState.tableau, selectedCard);
   updateCursorPosition(cursorRow, cursorColumn, gameState);
   DataStore.setData("gameState", gameState);
 }
+
 
 function moveCursorHorizontal(direction) {
   const delta = direction === "left" ? -1 : 1;
@@ -261,9 +259,9 @@ function moveCursorHorizontal(direction) {
 
   // 确保新的光标列在有效范围内
   if (newCursorColumn < 0) {
-    newCursorColumn = 9;
-  } else if (newCursorColumn > 9) {
     newCursorColumn = 0;
+  } else if (newCursorColumn > 9) {
+    newCursorColumn = 9;
   }
 
   if (selectedCard) {
@@ -283,9 +281,9 @@ function moveCursorHorizontal(direction) {
       } else {
         newCursorColumn += delta;
         if (newCursorColumn < 0) {
-          newCursorColumn = 9;
-        } else if (newCursorColumn > 9) {
           newCursorColumn = 0;
+        } else if (newCursorColumn > 9) {
+          newCursorColumn = 9;
         }
       }
 
@@ -319,8 +317,6 @@ function moveCursorHorizontal(direction) {
   }
 }
 
-
-let initialCursorColumn = -1;
 
 function handleTouchStart(event) {
   event.preventDefault();
@@ -368,7 +364,6 @@ function handleTouchStart(event) {
       }
     }
 
-    initialCursorColumn = cursorColumn;
 
     if (cursorColumn !== -1) {
       cursorRow = -1;
@@ -388,17 +383,7 @@ function getColumnCenterPosition(columnIndex) {
   }
 }
 
-
-
-
-function previewMoveToColumn(column) {
-  if (selectedCard) {
-    hasMoved = true;
-    cursorColumn = column;
-    gameState = DataStore.getData("gameState");
-    previewMove(cursorRow, cursorColumn, gameState);
-  }
-}
+let hasMovedHorizontally = false;
 
 function handleTouchMove(event) {
   event.preventDefault();
@@ -407,42 +392,44 @@ function handleTouchMove(event) {
   const deltaX = touchMoveX - touchStartX;
   const deltaY = touchMoveY - touchStartY;
 
-  const newCursorColumn = getColumnIndexFromTouchPosition(touchMoveX, touchMoveY);
-  let hasMovedToOtherColumn = false;
-  if (newCursorColumn !== -1) {
-    hasMovedToOtherColumn = initialCursorColumn !== newCursorColumn;
-    if (hasMovedToOtherColumn) {
-      const tableau = DataStore.getData("gameState").tableau;
-      const targetColumn = tableau[newCursorColumn];
-      const topCard = targetColumn[targetColumn.length - 1];
-
-      if ( selectedCard && ( !topCard || cardValue(topCard.rank) === cardValue(selectedCard.rank) + 1)) {
-        previewMoveToColumn(newCursorColumn);
-      }
-    }
-  }
 
   if (Math.abs(deltaX) > Math.abs(deltaY)) {
     // 水平移动
-  } else {
-    // 垂直移动
-    if (!hasMovedToOtherColumn) {
-      const steps = Math.floor(Math.abs(deltaY) / 30);
-      for (let i = 0; i < steps; i++) {
-        if (deltaY > 0) {
-          moveCursor("down");
-        } else {
-          moveCursor("up");
-        }
+    const steps = Math.floor(Math.abs(deltaX) / 30);
+    for (let i = 0; i < steps; i++) {
+      if (deltaX > 30) {
+        moveCursorHorizontal("right");
+        touchStartX = touchMoveX;
+        hasMovedHorizontally = true;
+      } else if (deltaX < -30) {
+        moveCursorHorizontal("left");
+        touchStartX = touchMoveX;
+        hasMovedHorizontally = true;
       }
-      touchStartY += steps * 10 * (deltaY > 0 ? 1 : -1);
     }
+    touchStartX += steps * 10 * (deltaX > 0 ? 1 : -1);
+  } 
+  
+  if (!hasMovedHorizontally) {
+    // 垂直移动
+    const steps = Math.floor(Math.abs(deltaY) / 30);
+    for (let i = 0; i < steps; i++) {
+      if (deltaY > 5) {
+        moveCursor("down");
+        touchStartY = touchMoveY;
+      } else if (deltaY < -5) {
+        moveCursor("up");
+        touchStartY = touchMoveY;
+      }
+    }
+    touchStartY += steps * 10 * (deltaY > 0 ? 1 : -1);
   }
 }
 
 
 function handleTouchEnd(event) {
   event.preventDefault();
+  hasMovedHorizontally = false;
   if(hasMoved){
     confirmMove();
   }else{
@@ -452,23 +439,8 @@ function handleTouchEnd(event) {
   hasMoved = false;
 }
 
-function getColumnIndexFromTouchPosition(x, y) {
-  const touchZoneElements = document.querySelectorAll(".touchControlColumn");
-  for (const touchZoneElement of touchZoneElements) {
-    const rect = touchZoneElement.getBoundingClientRect();
-    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-      console.log(parseInt(touchZoneElement.dataset.columnIndex, 10))
-      return parseInt(touchZoneElement.dataset.columnIndex, 10);
-    }
-  }
-  return -1;
-}
-
 
 function previewMove(row, column, gameState) {
-
-  console.log(row, column)
-
   // 更新光标位置
   cursorRow = row;
   cursorColumn = column;
@@ -705,9 +677,6 @@ class UIUpdater extends Observer {
 
       // 更新步数
       document.getElementById("stepCount").textContent = `Step count: ${data.gameState.stepCount}`;
-
-
-
       const possibleSuitSequences = countPossibleSuitSequences(data.gameState.tableau);
       data.gameState.possibleSuitSequences = possibleSuitSequences;
 
