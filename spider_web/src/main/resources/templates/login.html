@@ -10,34 +10,6 @@
     <link rel="stylesheet" href="../static/style/login.css">
 
     <script src="../static/script/jquery-1.12.4.js"></script>
-    <script>
-        function login(){
-            $.ajax({
-                type:"post",            //请求方式
-                url:"/spider/passport/login1",     //路径
-                async:true,             //是否异步
-                dataType:"json",        //返回数据的格式
-                params: {},
-                success:function(res){  //成功的回调函数
-                    console.log(res);    //res代表返回的数据，可以随心所欲处理数据啦
-                    window.location.href="/spider/index";
-                }
-            })
-        }
-
-        function register(){
-            $.ajax({
-                type:"post",                //请求方式
-                url:"/spider/register",     //路径
-                async:true,                 //是否异步
-                dataType:"json",            //返回数据的格式
-                success:function(res){      //成功的回调函数
-                    console.log(res);       //res代表返回的数据，可以随心所欲处理数据啦
-                }
-            })
-        }
-
-    </script>
 </head>
 
 <body>
@@ -45,18 +17,18 @@
 <div class="container">
     <!-- register -->
     <div class="form-container sign-up-container">
-        <div class="form">
-            <input type="text" name="username" id="username" placeholder="用户名">
-            <input type="email" name="emal" id="email" placeholder="邮箱">
-            <input type="password" name="password" id="password" placeholder="密码">
-            <input type="password" name="againPassword" id="againPassword" placeholder="确认密码">
+        <div class="form" id="registerForm">
+            <input type="text" name="username" id="newUsername" placeholder="用户名">
+            <input type="email" name="email" id="email" placeholder="邮箱(非必填)">
+            <input type="password" name="password" id="newPassword" placeholder="密码">
+            <input type="password" name="confirmPassword" id="confirmPassword" placeholder="确认密码">
             <button id="registerBtn" class="signUp" onclick="register()">注册</button>
         </div>
     </div>
     <!-- login -->
     <div class="form-container sign-in-container">
-        <div class="form">
-            <input type="email" name="emal" id="email" placeholder="邮箱">
+        <div class="form" id="loginForm">
+            <input type="text" name="username" id="username"  placeholder="用户名">
             <input type="password" name="password" id="password" placeholder="密码">
             <a href="#" class="forget-password">忘记你的密码</a>
             <button id="loginBtn" class="signIn" onclick="login()">登录</button>
@@ -80,6 +52,93 @@
 </div>
 
 <script src="../static/script/login.js"></script>
+<script>
+    function login(){
+        const username = $("#username").val()
+        const password = $("#password").val()
+
+        if (username == null || username === '') {
+            alert("用户名不能为空");
+            return;
+        } else if (password == null || password === '') {
+            alert("密码不能为空");
+            return;
+        } else if (password.length < 6) {
+            alert("密码不能少于6位");
+            return;
+        }
+
+        const userBO = {
+            username:username,
+            password:password
+        }
+        $.ajax({
+            type:"POST",                      //请求方式
+            url:"/spider/passport/login",     //路径
+            async:false,                      //是否异步
+            contentType: 'application/json',
+            data: JSON.stringify(userBO),
+            dataType:"json",        //返回数据的格式
+            success:function(res){  //成功的回调函数
+                //res代表返回的数据，可以随心所欲处理数据啦
+                if(res.status == 200){
+                    window.location.href="/spider/index";
+                }else{
+                    alert(res.msg);
+                }
+            }
+        })
+    }
+
+    function register(){
+        const username = $("#newUsername").val()
+        const email = $("#email").val()
+        const password = $("#newPassword").val()
+        const confirmPassword = $("#confirmPassword").val()
+
+        if (username == null || username ==='') {
+            alert("用户名不能为空");
+            return;
+        } else if (password == null || password ==='') {
+            alert("密码不能为空");
+            return;
+        } else if (password.length < 6) {
+            alert("密码不能少于6位");
+            return;
+        } else if (confirmPassword == null || confirmPassword ==='') {
+            alert("确认密码不能为空");
+            return;
+        } else if (confirmPassword !== password) {
+            alert("密码与确认密码不一致");
+            return;
+        }
+
+        const userBO = {
+            username: username,
+            email: email,
+            password: password,
+            confirmPassword: confirmPassword
+        };
+
+        $.ajax({
+            type:"POST",                      //请求方式
+            url:"/spider/passport/register",     //路径
+            async:false,                      //是否异步
+            contentType: 'application/json',
+            data: JSON.stringify(userBO),
+            dataType:"json",        //返回数据的格式
+            success:function(res){  //成功的回调函数
+                //res代表返回的数据，可以随心所欲处理数据啦
+                if(res.status === 200){
+                    window.location.href="/spider/index";
+                }else{
+                    alert(res.msg);
+                }
+            }
+        })
+    }
+
+</script>
 </body>
 
 </html>
