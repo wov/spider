@@ -395,8 +395,8 @@ function handleTouchMove(event) {
 
   if (Math.abs(deltaX) > Math.abs(deltaY)) {
     // 水平移动
-    const steps = Math.floor(Math.abs(deltaX) / 30);
-    for (let i = 0; i < steps; i++) {
+    // const steps = Math.floor(Math.abs(deltaX) / 30);
+    // for (let i = 0; i < steps; i++) {
       if (deltaX > 30) {
         moveCursorHorizontal("right");
         touchStartX = touchMoveX;
@@ -406,23 +406,23 @@ function handleTouchMove(event) {
         touchStartX = touchMoveX;
         hasMovedHorizontally = true;
       }
-    }
-    touchStartX += steps * 10 * (deltaX > 0 ? 1 : -1);
+    // }
+    // touchStartX += steps * 10 * (deltaX > 0 ? 1 : -1);
   } 
   
   if (!hasMovedHorizontally) {
     // 垂直移动
-    const steps = Math.floor(Math.abs(deltaY) / 30);
-    for (let i = 0; i < steps; i++) {
-      if (deltaY > 5) {
+    // const steps = Math.floor(Math.abs(deltaY) / 30);
+    // for (let i = 0; i < steps; i++) {
+      if (deltaY > 30) {
         moveCursor("down");
         touchStartY = touchMoveY;
-      } else if (deltaY < -5) {
+      } else if (deltaY < -10) {
         moveCursor("up");
         touchStartY = touchMoveY;
       }
-    }
-    touchStartY += steps * 10 * (deltaY > 0 ? 1 : -1);
+    // }
+    // touchStartY += steps * 10 * (deltaY > 0 ? 1 : -1);
   }
 }
 
