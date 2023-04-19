@@ -12,7 +12,6 @@
     <!-- qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM -->
 
     <main id="main">
-        <img id="spiderWeb" src="../static/svg/spiderweb.svg" />
         <!-- 装载卡牌的容器 -->
         <div id="cardContainer"></div>  
         <!-- 触摸控制区 -->
@@ -33,7 +32,6 @@
                 <p>游戏区翻开的牌：<span id="tableauFaceUpCount"></span></p> -->
                 <p id="stepCount">Step count: 0</p>
             </div>     
-            <div id="initializeApp">开始(E)</div>
             <div id="deal-cards" class="deal-cards-btn">发牌(Q)</div>       
         </div>
 
@@ -44,6 +42,18 @@
 
         <!-- 蜘蛛丝 -->
         <div id="silk" style="position: absolute; width: 2px; background-color: rgba(255, 255, 255, 0.6);"></div>
+
+        <!-- 开始界面 -->
+        <div class="welcomePanel">
+            <div class="panel">
+                <div class="inner">
+                    <div id="initializeApp" class="initializeApp">NEW GAME</div>
+                </div>
+            </div>
+        </div>
+
+
+        <img id="spiderWeb" src="../static/svg/spiderweb.svg" />
     </main>
 
     <script type="module">

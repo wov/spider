@@ -670,8 +670,6 @@ function findBestTargetColumn(gameState) {
 }
 
 
-
-
 // update ui
 class UIUpdater extends Observer {
   update(data) {
@@ -1291,6 +1289,11 @@ function isGameOver(gameState) {
 
 export async function initApp() {
 
+    // 关闭欢迎界面
+  const welcomePanel = document.querySelector('.welcomePanel');
+  welcomePanel.classList.add('disappear');
+
+
   if (DataStore.isInitialized) {
     // 应用已初始化，直接返回
     return;
@@ -1331,6 +1334,7 @@ document.addEventListener("gameStateInitialized", (event) => {
   // 更新卡牌被压住的状态
   updateCardCoveredStatus(gameState);
   initializeCursor(gameState);
+
 });
 
 // 计算目前可能可以完成的花色。
