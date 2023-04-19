@@ -407,6 +407,20 @@ div.card.face-down div.front{
 }
 
 
+.logo{
+    position: absolute;
+    pointer-events: none;
+
+    opacity: 0.6;
+    font-size: 48px;
+    color: #FFFFFF;
+    text-align: justify;
+    bottom: 9vw;
+    width: 100%;
+    text-align: center;
+
+}
+
 
 
 
