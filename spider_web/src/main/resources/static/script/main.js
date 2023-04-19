@@ -144,8 +144,6 @@ function updateGamepadStatus() {
         buttonTimestamps["stickRight"] = performance.now();
       }
 
-
-
       if (gamepad.buttons[upButtonIndex].pressed && isCooldownOver(upButtonIndex)) {
         moveCursor("up");
         buttonTimestamps[upButtonIndex] = performance.now();
@@ -1165,7 +1163,7 @@ function renderCards(gameState) {
   
       cardElement.style.left = `calc(${initialLeft} + ${stackIndex * xOffset}vw)`;
       cardElement.style.top = `calc(${initialTop} + ${cardIndexInStack * yOffset}px)`;
-      cardElement.style.zIndex = "0"; // 设置 z-index 为 0，使得暂存区的卡牌始终位于游戏区卡牌之下
+      cardElement.style.zIndex = "1"; // 设置 z-index 为 1
     }
   
     // 更新卡牌的翻开状态

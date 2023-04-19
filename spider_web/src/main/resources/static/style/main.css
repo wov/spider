@@ -29,8 +29,6 @@ html,body{
     user-select: none;
 }
 
-
-
 p{
     margin: 0;
 }
@@ -418,7 +416,16 @@ div.card.face-down div.front{
     bottom: 9vw;
     width: 100%;
     text-align: center;
+}
 
+
+.deal-cards-btn{
+    position: absolute;
+    width: 100%;
+    top: 80vh;
+    z-index: 2;
+    height: 15vw;
+    width: 50vw;
 }
 
 
