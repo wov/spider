@@ -364,7 +364,6 @@ function handleTouchStart(event) {
     }
 
     initialCursorColumn = cursorColumn;
-    
 
     if (cursorColumn !== -1) {
       cursorRow = -1;
@@ -390,7 +389,7 @@ let hasMovedHorizontally = false;
 
 function previewMoveToColumn(column) {
   if (selectedCard) {
-    hasMoved = true;
+    // hasMoved = true; 
     cursorColumn = column;
     gameState = DataStore.getData("gameState");
     previewMove(cursorRow, cursorColumn, gameState);
@@ -406,8 +405,12 @@ function handleTouchMove(event) {
 
   const newCursorColumn = getColumnIndexFromTouchPosition(touchMoveX, touchMoveY);
   let hasMovedToOtherColumn = false;
+
+
   if (newCursorColumn !== -1) {
     hasMovedToOtherColumn = initialCursorColumn !== newCursorColumn;
+    hasMoved = hasMovedToOtherColumn;
+
     if (hasMovedToOtherColumn) {
       const tableau = DataStore.getData("gameState").tableau;
       const targetColumn = tableau[newCursorColumn];
@@ -439,9 +442,7 @@ function getColumnIndexFromTouchPosition(x, y) {
     const rect = touchZoneElement.getBoundingClientRect();
     touchZoneElement.classList.remove('over');
     if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-      if(touchZoneElement.classList.contains('movable-to')){
-          touchZoneElement.classList.add('over');
-      }
+      touchZoneElement.classList.add('over');
       return parseInt(touchZoneElement.dataset.columnIndex, 10);
     }
   }
@@ -456,8 +457,14 @@ function handleTouchEnd(event) {
   }else{
     cancelMove();
   }
-
   hasMoved = false;
+
+  // 清空
+  const touchZoneElements = document.querySelectorAll(".touchControlColumn");
+  for (const touchZoneElement of touchZoneElements) {
+    touchZoneElement.classList.remove('over');
+  }
+
 }
 
 
@@ -1071,7 +1078,7 @@ function renderCard(card) {
     `;
 
   const cardEl = cardElement.querySelector(".card");
-  cardEl.style.left = initialLeft;
+  cardEl.style.left = '5px';
   cardEl.style.top = initialTop;
   return cardEl;
 }
@@ -1161,7 +1168,7 @@ function renderCards(gameState) {
       const yOffset = 0.5; // 每张卡片在堆中的垂直间距
 
   
-      cardElement.style.left = `calc(${initialLeft} + ${stackIndex * xOffset}vw)`;
+      cardElement.style.left = `calc(${initialLeft} + ${stackIndex * xOffset}vw + 5px)`;
       cardElement.style.top = `calc(${initialTop} + ${cardIndexInStack * yOffset}px)`;
       cardElement.style.zIndex = "1"; // 设置 z-index 为 1
     }
