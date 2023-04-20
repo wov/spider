@@ -708,7 +708,7 @@ class UIUpdater extends Observer {
       data.gameState.possibleSuitSequences = possibleSuitSequences;
 
       // 使用辅助函数将花色名称转换为对应的 emoji
-      const possibleSuitSequencesEmoji = possibleSuitSequences.map(suitToEmoji);
+      // const possibleSuitSequencesEmoji = possibleSuitSequences.map(suitToEmoji);
 
       // 比较新旧状态的 possibleSuitSequences 并找出新加入的值
       const newSequences = possibleSuitSequences.filter(
@@ -721,11 +721,19 @@ class UIUpdater extends Observer {
       }
 
       // 更新UI中的可能花色序列计数
-      const possibleSuitSequencesElement = document.getElementById("possible-suit-sequences");
-      if (possibleSuitSequencesElement) {
-        possibleSuitSequencesElement.textContent = `Possible Suit Sequences: ${possibleSuitSequencesEmoji.join(" ")}`;
-      }
+      // 先移除class。
+      const suitplaceholders = document.querySelectorAll('.suitplaceholder');
+      suitplaceholders.forEach( s => {
+        s.classList.remove('active');
+      });
 
+      // 再添加class- active
+      possibleSuitSequences.map( suit => {
+        const cn = `.${suit}placeholder`;
+        document.querySelector(cn).classList.add('active');
+      });
+
+      
       // 更新 previousSuitSequences 以便下次比较
       this.previousSuitSequences = possibleSuitSequences;
 
@@ -1129,6 +1137,7 @@ function renderCards(gameState) {
         return;
       }
 
+
       cardElement.style.left = `${columnIndex * 10}vw`;
       cardElement.style.top = `${cardIndex * 15}px`;
       cardElement.style.zIndex = `${cardIndex + 1}`; // 设置 z-index
@@ -1191,6 +1200,14 @@ function renderCards(gameState) {
       return;
     }
 
+    const suit = card.suit;
+    const blockContainer = document.querySelector(`.${suit}placeholder .block`);
+
+    const rect = blockContainer.getBoundingClientRect();
+    const left = rect.left;
+    const top = rect.top;
+
+
     // 计算卡牌位置
     const recyclingZoneSpacing = 0.5; // 可根据需要修改回收区卡牌间距的像素值
     const stacks = 8;
@@ -1201,11 +1218,10 @@ function renderCards(gameState) {
     const recyclingZoneTop = 80; // 可根据需要修改回收区距离顶部的百分比
     const stackSpacing = 0; // 可根据需要修改每个堆之间的距离
 
-    const cardLeft = recyclingZoneLeft + stackIndex * stackSpacing;
-    const cardTop = recyclingZoneTop + cardInStackIndex * recyclingZoneSpacing;
+    cardElement.style.left = `${left}px`;
+    cardElement.style.top = `${top}px`;
+    cardElement.style.zIndex = 100;
 
-    cardElement.style.left = `${cardLeft}vw`;
-    cardElement.style.top = `${cardTop}vh`;
     cardElement.style.zIndex = 0; // 设置较高的 z-index 以确保回收区卡牌显示在顶部
 
     // 更新卡牌的翻开状态

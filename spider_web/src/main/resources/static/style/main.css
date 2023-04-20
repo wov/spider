@@ -428,7 +428,7 @@ div.card.face-down div.front{
     width: 50vw;
 }
 
-.suitplaceholder{
+.suitplaceholderContainer{
     position: absolute;
     top: 50vh;
     display: flex;
@@ -437,13 +437,13 @@ div.card.face-down div.front{
     pointer-events: none;
 }
 
-.suitplaceholder > div{
+.suitplaceholderContainer .suitplaceholder{
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.suitplaceholder .block{
+.suitplaceholderContainer .block{
     width: calc(10vw + 2px);
     aspect-ratio: 7 / 10;
     box-shadow: inset 5px 5px 0 0 rgba(0,0,0,0.50);
@@ -451,16 +451,23 @@ div.card.face-down div.front{
     margin: 0 10px;
 }
 
-.suitplaceholder .icon{
+.suitplaceholderContainer .icon{
    width: 15px;
    margin: 3px;
 }
 
-.suitplaceholder .icon img{
+.suitplaceholderContainer .icon img{
     width: 100%;
     height: auto;
-    filter: grayscale(100%);
+    filter: grayscale(100%) brightness(0%);
+    opacity: 0.2;
+    transition: 0.3s;
  }
+
+ .suitplaceholderContainer .suitplaceholder.active .icon img{
+    filter: unset;
+    opacity: 1;
+}
 
 
 @keyframes shake {
@@ -474,15 +481,14 @@ div.card.face-down div.front{
     70% { transform: translate(-1px, 1px) rotate(-1deg); }
     80% { transform: translate(1px, -1px) rotate(1deg); }
     90% { transform: translate(-1px, 1px) rotate(-1deg); }
-  }
+}
 
-
-  /* 创建关键帧动画 */
-  @keyframes breathe {
+/* 创建关键帧动画 */
+@keyframes breathe {
     0%, 100% {
-      box-shadow: 0 0 5px rgba(255, 255, 0, 0.3);
+        box-shadow: 0 0 5px rgba(255, 255, 0, 0.3);
     }
     50% {
-      box-shadow: 0 0 15px rgba(255, 255, 0, 1);
+        box-shadow: 0 0 15px rgba(255, 255, 0, 1);
     }
-  }
+}
