@@ -46,6 +46,17 @@ cancelMoveButton.addEventListener("click", cancelMove);
 const initializeAppButton = document.getElementById("initializeApp");
 initializeAppButton.addEventListener("click", initApp, { once: true });
 
+
+let playedTimes = localStorage.getItem('playedTimes') || 0;
+let winedTimes = localStorage.getItem('winedTimes') || 0;
+let winRate = winedTimes/playedTimes || 0;
+
+// 更新赢取次数
+document.querySelector('#playedTimes').textContent = playedTimes;
+document.querySelector('#winedTimes').textContent = winedTimes;
+document.querySelector('#winRate').textContent =  `${parseFloat(winRate).toFixed(2)}%`;
+
+
 document.addEventListener("keydown", (event) => {
   switch (event.key.toLowerCase()) {
     case "arrowup":
@@ -482,7 +493,7 @@ function previewMove(row, column, gameState) {
     const cardElement = document.querySelector(`.card[data-id="${card.id}"]`);
     if (cardElement) {
       // 1. 使预览卡牌的 z-index 按顺序递增
-      cardElement.style.zIndex = 1000 + index;
+      cardElement.style.zIndex = 1100 + index;
 
       // 2. 更新卡牌位置以适应新列底部
       cardElement.style.left = `${column * 10}vw`;
@@ -569,6 +580,8 @@ function confirmMove() {
 
     // 更新卡牌被压住的状态
     updateCardCoveredStatus(gameState);
+
+    // 计算是否要移动到回收区
     const movedToRecycling = checkAndMoveSequencesToRecyclingZone(gameState);
 
     // 更新可能可以翻开的花色
@@ -740,6 +753,10 @@ class UIUpdater extends Observer {
       const isgameover = isGameOver(data.gameState);
 
       if(isgameover){
+        // 记录胜利次数
+        winedTimes = parseInt(winedTimes);
+        winedTimes++;
+        localStorage.setItem('winedTimes',winedTimes);
         alert(`You Win! /n your step is :  ${data.gameState.stepCount}`)
       }
 
@@ -1128,6 +1145,7 @@ function renderCards(gameState) {
   const cardContainer = document.getElementById("cardContainer");
   const cards = Array.from(cardContainer.querySelectorAll(".card"));
 
+  // 游戏区的卡牌
   gameState.tableau.forEach((column, columnIndex) => {
     column.forEach((card, cardIndex) => {
       const cardElement = cards.find((el) => el.dataset.id === card.id.toString());
@@ -1140,7 +1158,7 @@ function renderCards(gameState) {
 
       cardElement.style.left = `${columnIndex * 10}vw`;
       cardElement.style.top = `${cardIndex * 15}px`;
-      cardElement.style.zIndex = `${cardIndex + 1}`; // 设置 z-index
+      cardElement.style.zIndex = `${cardIndex + 1001}`; // 设置 z-index
 
 
       // 更新卡牌的翻开状态
@@ -1161,6 +1179,7 @@ function renderCards(gameState) {
     });
   });
 
+  // 暂存区的卡牌
   gameState.tempZone.forEach((card, index) => {
     const cardElement = cards.find((el) => el.dataset.id === card.id.toString());
   
@@ -1179,7 +1198,7 @@ function renderCards(gameState) {
   
       cardElement.style.left = `calc(${initialLeft} + ${stackIndex * xOffset}vw + 5px)`;
       cardElement.style.top = `calc(${initialTop} + ${cardIndexInStack * yOffset}px)`;
-      cardElement.style.zIndex = "1"; // 设置 z-index 为 1
+      cardElement.style.zIndex = "1100"; // 设置 z-index 为 1
     }
   
     // 更新卡牌的翻开状态
@@ -1209,24 +1228,13 @@ function renderCards(gameState) {
 
 
     // 计算卡牌位置
-    const recyclingZoneSpacing = 0.5; // 可根据需要修改回收区卡牌间距的像素值
     const stacks = 8;
     const stackIndex = cardIndex % stacks;
     const cardInStackIndex = Math.floor(cardIndex / stacks);
 
-    const recyclingZoneLeft = 80; // 可根据需要修改回收区距离左侧的百分比
-    const recyclingZoneTop = 80; // 可根据需要修改回收区距离顶部的百分比
-    const stackSpacing = 0; // 可根据需要修改每个堆之间的距离
-
-    cardElement.style.left = `${left}px`;
-    cardElement.style.top = `${top}px`;
-    cardElement.style.zIndex = 100;
-
-    cardElement.style.zIndex = 0; // 设置较高的 z-index 以确保回收区卡牌显示在顶部
-
-    // 更新卡牌的翻开状态
-    cardElement.classList.toggle("face-up", card.isFaceUp);
-    cardElement.classList.toggle("face-down", !card.isFaceUp);
+    cardElement.style.left = `${left + 5/cardValue(card.rank)}px`;
+    cardElement.style.top = `${top+ 5/cardValue(card.rank)}px`;
+    cardElement.style.zIndex = cardValue(card.rank); // 按卡牌的值设置z-index
 
     // 移除回收区卡牌的可选、选中和可移动到状态
     cardElement.classList.remove("selectable", "selected", "movable-to");
@@ -1310,15 +1318,20 @@ function isGameOver(gameState) {
 
 export async function initApp() {
 
+  // console.log('initapp')
     // 关闭欢迎界面
   const welcomePanel = document.querySelector('.welcomePanel');
   welcomePanel.classList.add('disappear');
-
 
   if (DataStore.isInitialized) {
     // 应用已初始化，直接返回
     return;
   }
+
+  // 增加游玩次数计算。
+  playedTimes = parseInt(playedTimes)
+  playedTimes++;
+  localStorage.setItem('playedTimes',playedTimes);
 
   // 将 isInitialized 设置为 true，表示已完成初始化
   DataStore.isInitialized = true;

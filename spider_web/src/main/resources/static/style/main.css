@@ -240,7 +240,7 @@ div.card.face-down div.front{
 #cursor {
     position: absolute;
     pointer-events: none;
-    z-index: 1002;
+    z-index: 2000;
     top: 0;
 }
 
@@ -386,6 +386,14 @@ div.card.face-down div.front{
     justify-content: center;
 }
 
+.welcomePanel p{
+    font-size: 24px;
+    color: #A2A2A2;
+    letter-spacing: -0.58px;
+    text-align: center;
+    font-weight: lighter;
+}
+
 
 .initializeApp{
     text-align: center;
@@ -423,7 +431,7 @@ div.card.face-down div.front{
     position: absolute;
     width: 100%;
     top: 80vh;
-    z-index: 2;
+    z-index: 2000;
     height: 15vw;
     width: 50vw;
 }
@@ -435,6 +443,7 @@ div.card.face-down div.front{
     justify-content: center;
     width: 100%;
     pointer-events: none;
+    z-index: 0;
 }
 
 .suitplaceholderContainer .suitplaceholder{
@@ -468,6 +477,9 @@ div.card.face-down div.front{
     filter: unset;
     opacity: 1;
 }
+
+
+
 
 
 @keyframes shake {
