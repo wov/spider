@@ -54,7 +54,7 @@ let winRate = winedTimes/playedTimes || 0;
 // 更新赢取次数
 document.querySelector('#playedTimes').textContent = playedTimes;
 document.querySelector('#winedTimes').textContent = winedTimes;
-document.querySelector('#winRate').textContent =  `${parseFloat(winRate).toFixed(2)}%`;
+document.querySelector('#winRate').textContent =  `${parseFloat(winRate*100).toFixed(2)}%`;
 
 
 document.addEventListener("keydown", (event) => {
