@@ -1226,14 +1226,16 @@ function renderCards(gameState) {
     const left = rect.left;
     const top = rect.top;
 
-
     // 计算卡牌位置
     const stacks = 8;
     const stackIndex = cardIndex % stacks;
     const cardInStackIndex = Math.floor(cardIndex / stacks);
 
-    cardElement.style.left = `${left + 5/cardValue(card.rank)}px`;
-    cardElement.style.top = `${top+ 5/cardValue(card.rank)}px`;
+    cardElement.style.left = `${left + 4 - 4*cardValue(card.rank)/13 }px`;
+    cardElement.style.top = `${top+ 6 - 6*cardValue(card.rank)/13 }px`;
+
+
+
     cardElement.style.zIndex = cardValue(card.rank); // 按卡牌的值设置z-index
 
     // 移除回收区卡牌的可选、选中和可移动到状态
