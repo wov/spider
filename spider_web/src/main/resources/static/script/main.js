@@ -56,6 +56,16 @@ document.querySelector('#playedTimes').textContent = playedTimes;
 document.querySelector('#winedTimes').textContent = winedTimes;
 document.querySelector('#winRate').textContent =  `${parseFloat(winRate*100).toFixed(2)}%`;
 
+// 是否显示resume
+if(localStorage.getItem('gameState') ){
+  const gs = JSON.parse(localStorage.getItem('gameState') )
+  // console.log(gs);
+  document.querySelector('#resumeGame').classList.add('show');
+  document.querySelector('#step').textContent = gs.stepCount;
+  document.querySelector('#resumeGame').addEventListener("click",resumeGame);
+}
+
+
 
 document.addEventListener("keydown", (event) => {
   switch (event.key.toLowerCase()) {
@@ -592,6 +602,7 @@ function confirmMove() {
 
     gameState.stepCount += 1;
     // 重新渲染卡牌
+
     DataStore.setData("gameState", gameState);
   }
 }
@@ -693,6 +704,10 @@ class UIUpdater extends Observer {
   update(data) {
     // console.log("Data changed:", data);
     if (data.hasOwnProperty("gameState")) {
+
+      // 存到localstorage中。
+      localStorage.setItem('gameState',JSON.stringify(data.gameState));
+
       renderCards(data.gameState);
 
       // 计算各区域的卡牌数量
@@ -1238,8 +1253,8 @@ function renderCards(gameState) {
 
     cardElement.style.zIndex = cardValue(card.rank); // 按卡牌的值设置z-index
 
-    // 移除回收区卡牌的可选、选中和可移动到状态
-    cardElement.classList.remove("selectable", "selected", "movable-to");
+    // 移除回收区卡牌的可选、选中、遮住和可移动到状态
+    cardElement.classList.remove("selectable", "selected", "movable-to","covered");
   });
 
 
@@ -1363,6 +1378,47 @@ export async function initApp() {
   await dealCards([...twoDecks]); // 使用解构来创建卡牌数组的副本
 
 }
+
+// Resume
+function resumeGame(){
+  const gameState = localStorage.getItem('gameState') && JSON.parse( localStorage.getItem('gameState') );
+
+  if(gameState){
+    // 关闭欢迎界面
+    const welcomePanel = document.querySelector('.welcomePanel');
+    welcomePanel.classList.add('disappear');
+  
+    if (DataStore.isInitialized) {
+      // 应用已初始化，直接返回
+      return;
+    }
+
+    const uiUpdater = new UIUpdater();
+    DataStore.addObserver(uiUpdater);
+  
+    // 创建2副牌，并洗牌。
+    const deck1 = createDeck();
+    const deck2 = createDeck();
+  
+    const twoDecks = deck1.concat(deck2);
+    shuffle(twoDecks);
+  
+    // 将所有卡牌放入暂存区
+    const initialGameState = {
+      tableau: Array(10).fill([]),
+      tempZone: twoDecks.map((card) => ({ ...card, inTempZone: true, isFaceUp: false })),
+      recyclingZone: [], // 回收区
+      possibleSuitSequences: [], // 有没有可回收的花色
+      stepCount: 0, // 初始化步数为 0
+    };
+    renderInitialCards(initialGameState);
+    DataStore.setData("gameState", initialGameState);  //   const initialGameState = {
+ 
+
+    DataStore.setData("gameState", gameState);
+  }
+}
+
 
 document.addEventListener("gameStateInitialized", (event) => {
   const gameState = event.detail.gameState;

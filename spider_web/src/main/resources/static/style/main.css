@@ -395,8 +395,20 @@ div.card.face-down div.front{
     font-weight: lighter;
 }
 
+h2{
+    text-align: center;
+}
 
-.initializeApp{
+.resumeGame{
+    display: none;
+}
+
+.resumeGame.show{
+    display: block;
+}
+
+
+.title{
     text-align: center;
     display: inline-block;
     font-size: 32px;
