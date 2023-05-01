@@ -772,6 +772,8 @@ class UIUpdater extends Observer {
         winedTimes = parseInt(winedTimes);
         winedTimes++;
         localStorage.setItem('winedTimes',winedTimes);
+        // 清空缓存
+        localStorage.removeItem("gameState");
         alert(`You Win! /n your step is :  ${data.gameState.stepCount}`)
       }
 
@@ -1255,7 +1257,11 @@ function renderCards(gameState) {
 
     // 移除回收区卡牌的可选、选中、遮住和可移动到状态
     cardElement.classList.remove("selectable", "selected", "movable-to","covered");
+    // 回收区的卡牌统一打开
+    cardElement.classList.add("face-up");
   });
+
+
 
 
   const selectedCard = gameState.tableau
@@ -1268,6 +1274,17 @@ function renderCards(gameState) {
     const touchControlColumn = document.getElementById(`touchControlColumn-${i}`);
     touchControlColumn.classList.toggle("selectable", columnHasSelectableCard(gameState.tableau, i));
     touchControlColumn.classList.toggle("movable-to", movableToColumns.includes(i));
+  }
+
+
+   // 检查游戏是否结束
+   if (isGameOver(gameState)) {
+    // 为每张卡片添加动画
+    cards.forEach((cardElement) => {
+      const duration = Math.random() * 2 + 1; // 随机动画持续时间，例如 1-3 秒
+      const delay = Math.random() * 2; // 随机动画延迟，例如 0-2 秒
+      cardElement.style.animation = `fly-out ${duration}s ${delay}s forwards`;
+    });
   }
 
 }
