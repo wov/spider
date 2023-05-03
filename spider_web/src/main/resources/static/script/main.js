@@ -928,14 +928,16 @@ async function dealCardsToTableau() {
 
     // 更新游戏状态
     DataStore.setData("gameState", gameState);
-
     // 在这里添加更新 DOM 的代码，以显示新的游戏状态
     // 您可以根据需要调用自定义的渲染函数
     // 更新卡牌被压住的状态
     updateCardCoveredStatus(gameState);
     initializeCursor(gameState);
-    // 在每次发牌之间添加 100ms 的延迟
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    
+   // 在每次发牌之间添加 100ms 的延迟
+   await new Promise((resolve) => setTimeout(resolve, 100));
+
+  
   }
 }
 
@@ -1248,8 +1250,8 @@ function renderCards(gameState) {
     const stackIndex = cardIndex % stacks;
     const cardInStackIndex = Math.floor(cardIndex / stacks);
 
-    cardElement.style.left = `${left + 4 - 4*cardValue(card.rank)/13 }px`;
-    cardElement.style.top = `${top+ 6 - 6*cardValue(card.rank)/13 }px`;
+    cardElement.style.left = `${left + 0.5 - 0.5*cardValue(card.rank)/13 }px`;
+    cardElement.style.top = `${top+ 2 - 2*cardValue(card.rank)/13 }px`;
 
 
 
@@ -1258,7 +1260,9 @@ function renderCards(gameState) {
     // 移除回收区卡牌的可选、选中、遮住和可移动到状态
     cardElement.classList.remove("selectable", "selected", "movable-to","covered");
     // 回收区的卡牌统一打开
-    cardElement.classList.add("face-up");
+    cardElement.classList.remove("face-down");
+    // 添加回收区的class
+    cardElement.classList.add("recycling");
   });
 
 
