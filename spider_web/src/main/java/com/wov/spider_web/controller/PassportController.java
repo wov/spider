@@ -48,8 +48,8 @@ public class PassportController {
 
     @PostMapping("/register")
     public SpiderJsonResult register(@RequestBody UserBO userBO,
-                                   HttpServletRequest request,
-                                   HttpServletResponse response) {
+                                     HttpServletRequest request,
+                                     HttpServletResponse response) {
         String username = userBO.getUsername();
         String password = userBO.getPassword();
         String confirmPwd = userBO.getConfirmPassword();
