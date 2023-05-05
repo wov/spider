@@ -253,7 +253,7 @@ div.card.face-down div.front{
 #cursor {
     position: absolute;
     pointer-events: none;
-    z-index: 2000;
+    z-index: 2001;
 
 }
 
@@ -266,8 +266,6 @@ div.card.face-down div.front{
 #silk{
     pointer-events: none;
     z-index: 2000;
-    top: 0;
-
     transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
 

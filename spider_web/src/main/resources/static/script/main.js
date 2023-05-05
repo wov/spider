@@ -936,6 +936,7 @@ async function dealCardsToTableau() {
     
    // 在每次发牌之间添加 100ms 的延迟
    await new Promise((resolve) => setTimeout(resolve, 100));
+   
 
   
   }
@@ -1133,6 +1134,8 @@ function updateCardCoveredStatus(gameState) {
       card.isCovered = cardIndex < column.length - 1;
     });
   });
+  DataStore.setData("gameState", gameState);
+
 }
 
 function renderInitialCards(gameState) {
@@ -1217,7 +1220,7 @@ function renderCards(gameState) {
   
       cardElement.style.left = `calc(${initialLeft} + ${stackIndex * xOffset}vw + 5px)`;
       cardElement.style.top = `calc(${initialTop} + ${cardIndexInStack * yOffset}px)`;
-      cardElement.style.zIndex = "1100"; // 设置 z-index 为 1
+      cardElement.style.zIndex = `${1000+cardIndexInStack}`; // 设置 z-index 
     }
   
     // 更新卡牌的翻开状态
