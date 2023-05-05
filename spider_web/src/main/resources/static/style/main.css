@@ -102,6 +102,7 @@ css-doodle {
 
     transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
     pointer-events: none;
+    box-sizing: border-box;
 }
 
 .card.selected{
@@ -135,8 +136,6 @@ css-doodle {
     backface-visibility: hidden;
 
 	transform: perspective(400px) rotateY(179.9deg);
-
-    /* transition: 0.5s; */
 
     transition: transform 0.5s;
     transform-style: preserve-3d;
@@ -205,6 +204,7 @@ div.card.face-down div.front{
 }
 
 .card.movable-to{
+    box-shadow:  1px 1px 0 rgb(242, 1, 255);
     animation: breathe 5s ease-in-out infinite;
 }
 
