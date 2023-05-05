@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
         user.setUpdatedTime(new Date());
 
         usersMapper.insert(user);
-        log.info(String.format("%s成功注册",user.getUsername()));
+        log.info(String.format("%s成功注册", user.getUsername()));
 
         return user;
     }

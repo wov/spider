@@ -28,7 +28,7 @@
     <!-- login -->
     <div class="form-container sign-in-container">
         <div class="form" id="loginForm">
-            <input type="text" name="username" id="username"  placeholder="用户名">
+            <input type="text" name="username" id="username" placeholder="用户名">
             <input type="password" name="password" id="password" placeholder="密码">
             <a href="#" class="forget-password">忘记你的密码</a>
             <button id="loginBtn" class="signIn" onclick="login()">登录</button>
@@ -53,7 +53,7 @@
 
 <script src="../static/script/login.js"></script>
 <script>
-    function login(){
+    function login() {
         const username = $("#username").val()
         const password = $("#password").val()
 
@@ -69,43 +69,43 @@
         }
 
         const userBO = {
-            username:username,
-            password:password
+            username: username,
+            password: password
         }
         $.ajax({
-            type:"POST",                      //请求方式
-            url:"/spider/passport/login",     //路径
-            async:false,                      //是否异步
+            type: "POST",                      //请求方式
+            url: "/spider/passport/login",     //路径
+            async: false,                      //是否异步
             contentType: 'application/json',
             data: JSON.stringify(userBO),
-            dataType:"json",        //返回数据的格式
-            success:function(res){  //成功的回调函数
+            dataType: "json",        //返回数据的格式
+            success: function (res) {  //成功的回调函数
                 //res代表返回的数据，可以随心所欲处理数据啦
-                if(res.status == 200){
-                    window.location.href="/spider/index";
-                }else{
+                if (res.status == 200) {
+                    window.location.href = "/spider/index";
+                } else {
                     alert(res.msg);
                 }
             }
         })
     }
 
-    function register(){
+    function register() {
         const username = $("#newUsername").val()
         const email = $("#email").val()
         const password = $("#newPassword").val()
         const confirmPassword = $("#confirmPassword").val()
 
-        if (username == null || username ==='') {
+        if (username == null || username === '') {
             alert("用户名不能为空");
             return;
-        } else if (password == null || password ==='') {
+        } else if (password == null || password === '') {
             alert("密码不能为空");
             return;
         } else if (password.length < 6) {
             alert("密码不能少于6位");
             return;
-        } else if (confirmPassword == null || confirmPassword ==='') {
+        } else if (confirmPassword == null || confirmPassword === '') {
             alert("确认密码不能为空");
             return;
         } else if (confirmPassword !== password) {
@@ -121,17 +121,17 @@
         };
 
         $.ajax({
-            type:"POST",                      //请求方式
-            url:"/spider/passport/register",     //路径
-            async:false,                      //是否异步
+            type: "POST",                      //请求方式
+            url: "/spider/passport/register",     //路径
+            async: false,                      //是否异步
             contentType: 'application/json',
             data: JSON.stringify(userBO),
-            dataType:"json",        //返回数据的格式
-            success:function(res){  //成功的回调函数
+            dataType: "json",        //返回数据的格式
+            success: function (res) {  //成功的回调函数
                 //res代表返回的数据，可以随心所欲处理数据啦
-                if(res.status === 200){
-                    window.location.href="/spider/index";
-                }else{
+                if (res.status === 200) {
+                    window.location.href = "/spider/index";
+                } else {
                     alert(res.msg);
                 }
             }
