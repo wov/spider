@@ -1288,7 +1288,8 @@ function renderCards(gameState) {
     // 为每张卡片添加位移、三维旋转
     cards.forEach((cardElement, index) => {
       const { xOffset, yOffset, rotationX, rotationY, rotationZ } = randomDisplacementAndRotation3D();
-      cardElement.style.transform = `translate(${xOffset}, ${yOffset}) rotateX(${rotationX}) rotateY(${rotationY}) rotateZ(${rotationZ})`;
+      cardElement.style.transition = `all 5s cubic-bezier(0.25, 1, 0.5, 1)`;
+      cardElement.style.transform = `translate(${xOffset}, ${yOffset}) rotateX(${rotationX}) rotateY(${rotationY}) rotateZ(${rotationZ}) scale(3)`;
     });
   }
 }
@@ -1458,8 +1459,8 @@ document.addEventListener("gameStateInitialized", (event) => {
 
 // 生成随机位移和旋转角度
 function randomDisplacementAndRotation3D() {
-  const xOffset = (Math.random() * 2 - 1) * 300 + "vw";
-  const yOffset = (Math.random() * 2 - 1) * 300 + "vh";
+  const xOffset = (Math.random() * 2 + 1) * 100 + "vw";
+  const yOffset = (Math.random() * 2 + 1) * 100 + "vh";
   const rotationX = (Math.random() * 2 - 1) * 720 + "deg";
   const rotationY = (Math.random() * 2 - 1) * 720 + "deg";
   const rotationZ = (Math.random() * 2 - 1) * 720 + "deg";
