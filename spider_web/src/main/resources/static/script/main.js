@@ -1459,8 +1459,8 @@ document.addEventListener("gameStateInitialized", (event) => {
 
 // 生成随机位移和旋转角度
 function randomDisplacementAndRotation3D() {
-  const xOffset = (Math.random() * 2 + 1) * 100 + "vw";
-  const yOffset = (Math.random() * 2 + 1) * 100 + "vh";
+  const xOffset = (Math.random() * 2 - 1) * 200 + "vw";
+  const yOffset = (Math.random() * 2 - 1) * 200 + "vh";
   const rotationX = (Math.random() * 2 - 1) * 720 + "deg";
   const rotationY = (Math.random() * 2 - 1) * 720 + "deg";
   const rotationZ = (Math.random() * 2 - 1) * 720 + "deg";
