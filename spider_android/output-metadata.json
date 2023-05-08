@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.example.spider_android",
+  "applicationId": "com.spiderpocket.spider_android",
   "variantName": "debug",
   "elements": [
     {
