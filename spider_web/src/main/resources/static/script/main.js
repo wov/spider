@@ -507,7 +507,7 @@ function previewMove(row, column, gameState) {
 
       // 2. 更新卡牌位置以适应新列底部
       cardElement.style.left = `${column * 10}vw`;
-      cardElement.style.top = `${(gameState.tableau[column].length + index) * 15}px`;
+      cardElement.style.top = `${(gameState.tableau[column].length + index) * 15 + 5}px`;
     }
   });
 
@@ -1179,7 +1179,7 @@ function renderCards(gameState) {
 
 
       cardElement.style.left = `${columnIndex * 10}vw`;
-      cardElement.style.top = `${cardIndex * 15}px`;
+      cardElement.style.top = `${cardIndex * 15 + 5}px`;
       cardElement.style.zIndex = `${cardIndex + 1001}`; // 设置 z-index
 
 
