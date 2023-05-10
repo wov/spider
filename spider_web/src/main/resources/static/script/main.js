@@ -509,7 +509,7 @@ function previewMove(row, column, gameState) {
 
       // 2. 更新卡牌位置以适应新列底部
       cardElement.style.left = `${column * 10}vw`;
-      cardElement.style.top = `${(gameState.tableau[column].length + index) * cardGap + 5}vw`;
+      cardElement.style.top = `${(gameState.tableau[column].length + index) * cardGap + 0.5}vw`;
     }
   });
 
@@ -952,14 +952,14 @@ function updateCursorPosition(row, column, gameState) {
   const numCardsInColumn = gameState.tableau[column].length;
 
   if (row === -1) {
-    spider.style.transform = `translate(-50%, -50%) translate(${column * 10 + 5}vw, ${(numCardsInColumn * cardGap) + 15}vw)`;
+    spider.style.transform = `translate(-50%, -50%) translate(${column * 10 + 5}vw, ${(numCardsInColumn * cardGap) + 11}vw)`;
   } else {
     spider.style.transform = `translate(-50%, -50%) translate(${column * 10 + 5}vw, ${row * cardGap}vw)`;
   }
 
   // 更新蜘蛛丝位置
   const xValue = `${column * 10 + 5}vw`;
-  const y2Value = row === -1 ? `${(numCardsInColumn * cardGap) + 15}vw` : `${row * cardGap}vw`;
+  const y2Value = row === -1 ? `${(numCardsInColumn * cardGap) + 11}vw` : `${row * cardGap}vw`;
 
   silk.style.left = xValue;
   silk.style.height = y2Value;
@@ -1180,7 +1180,7 @@ function renderCards(gameState) {
       }
 
       cardElement.style.left = `${columnIndex * 10}vw`;
-      cardElement.style.top = `${cardIndex * cardGap + 5}vw`;
+      cardElement.style.top = `${cardIndex * cardGap + 0.5}vw`;
       cardElement.style.zIndex = `${cardIndex + 1001}`; // 设置 z-index
 
 

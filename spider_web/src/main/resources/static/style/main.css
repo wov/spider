@@ -58,6 +58,7 @@ main{
         20px
     ) env(safe-area-inset-left, 20px);
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 #spiderWeb{
