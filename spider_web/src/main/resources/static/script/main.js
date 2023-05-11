@@ -1224,8 +1224,8 @@ function renderCards(gameState) {
 
   
       cardElement.style.left = `calc(${initialLeft} + ${stackIndex * xOffset}vw + 5px)`;
-      cardElement.style.bottom = `calc( 6.4vw - ${cardIndexInStack * yOffset}px)`;
-      cardElement.style.top = `unset`;
+      // cardElement.style.bottom = `calc( 6.4vw - ${cardIndexInStack * yOffset}px)`;
+      cardElement.style.top = `calc(100vh - 19.5vw + ${cardIndexInStack * yOffset}px )`;
 
       cardElement.style.zIndex = `${1000+cardIndexInStack}`; // 设置 z-index 
     }
