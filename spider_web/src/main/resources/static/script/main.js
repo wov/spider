@@ -941,9 +941,6 @@ async function dealCardsToTableau() {
     
    // 在每次发牌之间添加 100ms 的延迟
    await new Promise((resolve) => setTimeout(resolve, 100));
-   
-
-  
   }
 }
 
@@ -1109,6 +1106,10 @@ function renderCard(card) {
   const isRed = card.suit === "diamond" || card.suit === "heart";
   const color = isRed ? "red" : "black";
 
+  const dealCardsBtn = document.querySelector('.deal-cards-btn');
+  const rect = dealCardsBtn.getBoundingClientRect();
+  const _top = rect.top;
+
   const cardElement = document.createElement("div");
   cardElement.innerHTML = `
       <div class="card ${card.isFaceUp ? 'face-up' : 'face-down'}" data-id="${card.id}" data-value="${card.rank}" data-suit="${card.suit}">
@@ -1129,7 +1130,7 @@ function renderCard(card) {
 
   const cardEl = cardElement.querySelector(".card");
   cardEl.style.left = '5px';
-  cardEl.style.top = 'calc(100vh - 19.5vw)';
+  cardEl.style.top = `${_top + 5}px`;
 
   return cardEl;
 }
@@ -1209,6 +1210,10 @@ function renderCards(gameState) {
   // 暂存区的卡牌
   gameState.tempZone.forEach((card, index) => {
     const cardElement = cards.find((el) => el.dataset.id === card.id.toString());
+    const dealCardsBtn = document.querySelector('.deal-cards-btn');
+    const rect = dealCardsBtn.getBoundingClientRect();
+    const _top = rect.top;
+
   
     if (!cardElement) {
       console.error("Card element not found:", card);
@@ -1222,10 +1227,8 @@ function renderCards(gameState) {
       const xOffset = 10.1; // 你可以根据需要调整每个堆之间的间距
       const yOffset = 0.5; // 每张卡片在堆中的垂直间距
 
-  
       cardElement.style.left = `calc(${initialLeft} + ${stackIndex * xOffset}vw + 5px)`;
-      // cardElement.style.bottom = `calc( 6.4vw - ${cardIndexInStack * yOffset}px)`;
-      cardElement.style.top = `calc(100vh - 19.5vw + ${cardIndexInStack * yOffset}px )`;
+      cardElement.style.top = `calc(${_top + 5 + cardIndexInStack * yOffset}px)`;
 
       cardElement.style.zIndex = `${1000+cardIndexInStack}`; // 设置 z-index 
     }
