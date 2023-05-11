@@ -33,6 +33,9 @@ const cancelMoveButton = document.getElementById("cancelMove");
 
 const dealCardsButton = document.getElementById("deal-cards");
 
+const giveUpButton = document.getElementById("give-up");
+
+giveUpButton.addEventListener("click",restartGame);
 dealCardsButton.addEventListener("click", dealCardsToTableau);
 
 // 为按钮添加事件监听器
@@ -1126,7 +1129,8 @@ function renderCard(card) {
 
   const cardEl = cardElement.querySelector(".card");
   cardEl.style.left = '5px';
-  cardEl.style.top = initialTop;
+  cardEl.style.top = 'calc(100vh - 19.5vw)';
+
   return cardEl;
 }
 
@@ -1150,7 +1154,7 @@ function renderInitialCards(gameState) {
   });
 
   for (let i = 0; i < 10; i++) {
-    const xOffset = 10.1; // 你可以根据需要调整每个堆之间的间距
+    const xOffset = 10; // 你可以根据需要调整每个堆之间的间距
     const touchControlColumn = document.createElement("div");
     touchControlColumn.id = `touchControlColumn-${i}`;
     touchControlColumn.classList.add("touchControlColumn");
@@ -1220,7 +1224,9 @@ function renderCards(gameState) {
 
   
       cardElement.style.left = `calc(${initialLeft} + ${stackIndex * xOffset}vw + 5px)`;
-      cardElement.style.top = `calc(${initialTop} + ${cardIndexInStack * yOffset}px)`;
+      cardElement.style.bottom = `calc( 6.4vw - ${cardIndexInStack * yOffset}px)`;
+      cardElement.style.top = `unset`;
+
       cardElement.style.zIndex = `${1000+cardIndexInStack}`; // 设置 z-index 
     }
   
@@ -1358,10 +1364,14 @@ function isGameOver(gameState) {
 
 export async function initApp() {
 
-  // console.log('initapp')
     // 关闭欢迎界面
   const welcomePanel = document.querySelector('.welcomePanel');
   welcomePanel.classList.add('disappear');
+
+  // 打开按钮
+  const gameBtns =  document.querySelector('.game-btns');
+  gameBtns.classList.add('show');
+
 
   if (DataStore.isInitialized) {
     // 应用已初始化，直接返回
@@ -1416,6 +1426,10 @@ function resumeGame(){
     // 关闭欢迎界面
     const welcomePanel = document.querySelector('.welcomePanel');
     welcomePanel.classList.add('disappear');
+
+      // 打开按钮
+    const gameBtns =  document.querySelector('.game-btns');
+    gameBtns.classList.add('show');
   
     if (DataStore.isInitialized) {
       // 应用已初始化，直接返回
@@ -1492,4 +1506,12 @@ function countPossibleSuitSequences(tableau) {
   });
 
   return completeSequences;
+}
+
+function restartGame(){
+    const r = confirm('Are you sure you want to restart the game?')
+    if(r){
+      localStorage.removeItem("gameState");
+      location.reload();
+    }
 }
