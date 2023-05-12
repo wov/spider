@@ -205,7 +205,7 @@ div.card.face-down div.front{
 }
 
 .card.movable-to{
-    box-shadow:  1px 1px 0 rgb(242, 1, 255);
+    box-shadow: 0 0 3px rgba(0, 0, 0, .3);
     animation: breathe 5s ease-in-out infinite;
 }
 
@@ -514,7 +514,7 @@ h2{
     justify-content: center;
     width: 100%;
     pointer-events: none;
-    z-index: 0;
+    z-index: 100;
 }
 
 .suitplaceholderContainer .suitplaceholder{
@@ -524,7 +524,7 @@ h2{
 }
 
 .suitplaceholderContainer .block{
-    width: calc(10vw);
+    width: calc(10vw - 1px);
     aspect-ratio: 7 / 10;
     box-shadow: inset 0px 0px 3px 0 rgba(107, 107, 107, 0.5);
     border: .5px solid #4a4a4a;
@@ -567,20 +567,9 @@ h2{
     90% { transform: translate(-1px, 1px) rotate(-1deg); }
 }
 
-/* 创建关键帧动画 */
-@keyframes breathe {
-    0%, 100% {
-        box-shadow: 0 0 5px rgba(255, 255, 0, 0.3);
-    }
-    50% {
-        box-shadow: 0 0 15px rgba(255, 255, 0, 1);
-    }
-}
-
-@keyframes fly-out {
-    100% {
-      transform: translateX(calc(100vw + 50%)) translateY(calc(-100vh - 50%));
-      opacity: 0;
-    }
+/* 放大后缩小 */
+@keyframes scaleup-and-down {
+    0%, 100% { transform: scale(1); }   /* 初始状态和最终状态，不放大不缩小 */
+    50% { transform: scale(5); } /* 中间状态，放大1.5倍 */
   }
   

@@ -747,12 +747,19 @@ class UIUpdater extends Observer {
       const newSequences = possibleSuitSequences.filter(
         (sequence) => !this.previousSuitSequences.includes(sequence)
       );
-      if (newSequences.length > 0) {
-        // 将新加入的花色转换为对应的 emoji
-        const newSequencesEmoji = newSequences.map(suitToEmoji);
-        alert(`Newly added suit sequences: ${newSequencesEmoji.join(" ")}`);
-      }
 
+      if (newSequences.length > 0) {
+        newSequences.forEach(suit => {
+          const iconElement = document.querySelector(`.${suit}placeholder .icon`);
+          // 为每个新花色添加动画
+          iconElement.style.animation = 'scaleup-and-down 1s ease-in-out';
+          iconElement.addEventListener('animationend', function() {
+            this.style.animation = '';
+          });
+        });
+      }
+  
+      
       // 更新UI中的可能花色序列计数
       // 先移除class。
       const suitplaceholders = document.querySelectorAll('.suitplaceholder');
@@ -1263,8 +1270,8 @@ function renderCards(gameState) {
     const stackIndex = cardIndex % stacks;
     const cardInStackIndex = Math.floor(cardIndex / stacks);
 
-    cardElement.style.left = `${left + 0.5 - 0.5*cardValue(card.rank)/13 }px`;
-    cardElement.style.top = `${top+ 2 - 2*cardValue(card.rank)/13 }px`;
+    cardElement.style.left = `${left - 0.5*cardValue(card.rank)/13 }px`;
+    cardElement.style.top = `${top+ 3 - 2*cardValue(card.rank)/13 }px`;
 
 
 
