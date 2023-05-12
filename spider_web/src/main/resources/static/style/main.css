@@ -6,13 +6,11 @@
     --card-bg: #fff;   
 }
 
+
+
 @font-face {font-family: "GeoSlab703 Md BT"; 
-    src: url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.eot");
-    src: url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.eot?#iefix") format("embedded-opentype"),
-    url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.woff2") format("woff2"), 
-    url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.woff") format("woff"),
-    url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.ttf") format("truetype"),
-    url("//db.onlinewebfonts.com/t/b035476a570a82a2be6d816ccf71d241.svg#GeoSlab703 Md BT") format("svg"); 
+    src: url("../fonts/GeoSlab703MdBT.woff2")  format("woff2"), 
+        url("../fonts/GeoSlab703MdBT.woff")  format("woff");
 }
 
 html,body{
