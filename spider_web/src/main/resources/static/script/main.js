@@ -35,6 +35,9 @@ const dealCardsButton = document.getElementById("deal-cards");
 
 const giveUpButton = document.getElementById("give-up");
 
+const restartGameButton = document.getElementById("restart-game");
+
+restartGameButton.addEventListener("click",reloadGame);
 giveUpButton.addEventListener("click",restartGame);
 dealCardsButton.addEventListener("click", dealCardsToTableau);
 
@@ -786,7 +789,16 @@ class UIUpdater extends Observer {
         localStorage.setItem('winedTimes',winedTimes);
         // 清空缓存
         localStorage.removeItem("gameState");
-        alert(`You Win! /n your step is :  ${data.gameState.stepCount}`)
+
+        const finalstepDom = document.querySelector('#finalstep');
+        if(finalstepDom){
+          finalstepDom.textContent = data.gameState.stepCount;
+        }
+
+        const endPanelDom = document.querySelector('.endPanel');
+        if(endPanelDom){
+          endPanelDom.classList.add('appear');
+        }
       }
 
     }
@@ -1422,15 +1434,9 @@ export async function initApp() {
 
 }
 
-
-
-
 // Resume
 function resumeGame(){
   const gameState = localStorage.getItem('gameState') && JSON.parse( localStorage.getItem('gameState') );
-
-  // TODO: 清空可选状态。。。
-  console.log(gameState)
 
   if(gameState){
     // 关闭欢迎界面
@@ -1465,9 +1471,8 @@ function resumeGame(){
       stepCount: 0, // 初始化步数为 0
     };
     renderInitialCards(initialGameState);
-    DataStore.setData("gameState", initialGameState);  //   const initialGameState = {
- 
-
+    DataStore.setData("gameState", initialGameState);  
+    // 先初始化后再设置新的状态。。。。
     DataStore.setData("gameState", gameState);
   }
 }
@@ -1524,4 +1529,8 @@ function restartGame(){
       localStorage.removeItem("gameState");
       location.reload();
     }
+}
+
+function reloadGame(){
+  location.reload();
 }
