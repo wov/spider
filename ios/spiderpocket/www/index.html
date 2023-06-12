@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SpiderPocket</title>
+    <link rel="stylesheet" href="./style/main.css">
+        
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+</head>
+<body>
+    <main id="main">
+        <!-- 装载卡牌的容器 -->
+        <div id="cardContainer"></div>
+        <!-- 触摸控制区 -->
+        <div id="touchControlContainer"></div>
+        <div class="controlContainer">
+            <div class="controls">
+                <div class="up" id="upButton">上 &#8593;</div>
+                <div class="down" id="downButton">下 &#8595;</div>
+                <div class="left" id="leftButton">左 &#8592;</div>
+                <div class="right" id="rightButton">右 &#8594;</div>
+
+                <div class="confirm" id="confirmMove">确定(enter)</div>
+                <div class="cancel" id="cancelMove">取消(esc)</div>
+            </div>
+            <div id="possible-suit-sequences" style="visibility: hidden;">Possible Suit Sequences: </div>
+            <div class="info">
+                <!-- <p>游戏区扣合的牌：<span id="tableauFaceDownCount"></span></p>
+                <p>游戏区翻开的牌：<span id="tableauFaceUpCount"></span></p> -->
+                <p id="stepCount"  style="visibility: hidden;">Step count: 0</p>
+            </div>
+        </div>
+
+        <!-- 发牌按钮 -->
+        <div class="game-btns">
+            <div id="deal-cards" class="deal-cards-btn">Spider Pocket</div>
+            <div id="give-up" class="give-up-btn">Start a New Game</div>
+                   <!-- <div id="retry" class="retry-btn">Retry this Round</div> -->
+        </div>
+ 
+
+        <!-- 蜘蛛丝 -->
+        <div id="silk" style="position: absolute; width: 2px; background-color: rgba(255, 255, 255, 0.6);"></div>
+
+        <!-- 光标，这里是小蜘蛛 -->
+        <div id="cursor">
+            <img id="spider" src="./svg/spider.svg" style="position: absolute; top: 0; transform: translate(-50%, -50%);" />
+        </div>
+
+
+        <!-- 开始界面 -->
+        <div class="welcomePanel">
+            <div class="panel">
+                <div class="inner">
+                    <h2  id="initializeApp">
+                        <div class="title">NEW GAME</div>
+                        <p>
+                            
+                            <span id="winedTimes">0</span><span>(win)</span>/
+                            <span id="playedTimes">0</span><span>(total)</span>,
+                            <span id="winRate">0%</span>
+                        </p>
+                    </h2>
+
+                    <h2  id="resumeGame" class="resumeGame">
+                        <div class="title">RESUME</div>
+                        <p>
+                            <span>step:</span>
+                            <span id="step">0</span>
+                        </p>
+                    </h2>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- 结束界面 -->
+
+        <div class="endPanel">
+            <div class="panel">
+                <div class="inner">
+                    <h3>Good Job!</h3>
+                    <p>Your step is: <span id="finalstep"></span> </p>
+                    <!-- <div>
+                        <div>Share this round to your firend:</div>
+                        <div>
+                            <input type="text" readonly value="12345"> <button>copy to clipboard</button>
+                        </div>
+                    </div> -->
+                    <div id="restart-game" class="restart-game-btn">New Game</div>
+                </div>
+
+            </div>
+        </div>
+
+
+
+        <!-- 用来存放完成的卡牌 -->
+        <!-- const suits = ["spade", "club", "heart", "diamond"]; -->
+
+        <div class="suitplaceholderContainer">
+            <div class="spadeplaceholder suitplaceholder">
+                <div class="block"></div>
+                <div class="icon">
+                    <img src="./svg/spade.svg" alt="">
+                </div>
+            </div>
+            <div class="heartplaceholder suitplaceholder">
+                <div class="block"></div>
+                <div class="icon">
+                    <img src="./svg/heart.svg" alt="">
+                </div>
+            </div>
+            <div class="clubplaceholder suitplaceholder">
+                <div class="block"></div>
+                <div class="icon">
+                    <img src="./svg/club.svg" alt="">
+                </div>
+            </div>
+            <div class="diamondplaceholder suitplaceholder">
+                <div class="block"></div>
+                <div class="icon">
+                    <img src="./svg/diamond.svg" alt="">
+                </div>
+            </div>
+        </div>
+
+        <!-- <div class="logo">Spider Pocket</div> -->
+        <img id="spiderWeb" src="./svg/spiderweb.svg" />
+    </main>
+    
+    <script src="./script/main.js"></script>
+</body>
+</html>
