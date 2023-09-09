@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import GoogleMobileAds
+
 
 @main
 struct spiderpocketApp: App {

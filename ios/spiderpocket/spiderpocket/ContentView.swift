@@ -1,6 +1,10 @@
 import SwiftUI
 import WebKit
 
+import UIKit
+import GoogleMobileAds
+
+
 struct ContentView: View {
     var body: some View {
             ZStack {
@@ -133,6 +137,7 @@ struct WebView: UIViewRepresentable {
 
             rootViewController.present(alertController, animated: true, completion: nil)
         }
+        
 
         func performRestart() {
             guard let webView = self.webView else { return }
@@ -150,3 +155,43 @@ struct WebView: UIViewRepresentable {
 
     }
 }
+
+
+class ViewController: UIViewController, GADFullScreenContentDelegate {
+
+  private var interstitial: GADInterstitialAd?
+
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    let request = GADRequest()
+    GADInterstitialAd.load(withAdUnitID: "ca-app-pub-3871661481025389/6424030517",
+                                request: request,
+                      completionHandler: { [self] ad, error in
+                        if let error = error {
+                          print("Failed to load interstitial ad with error: \(error.localizedDescription)")
+                          return
+                        }
+                        interstitial = ad
+                        interstitial?.fullScreenContentDelegate = self
+                      }
+    )
+  }
+
+  /// Tells the delegate that the ad failed to present full screen content.
+  func ad(_ ad: GADFullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
+    print("Ad did fail to present full screen content.")
+  }
+
+  /// Tells the delegate that the ad will present full screen content.
+  func adWillPresentFullScreenContent(_ ad: GADFullScreenPresentingAd) {
+    print("Ad will present full screen content.")
+  }
+
+  /// Tells the delegate that the ad dismissed full screen content.
+  func adDidDismissFullScreenContent(_ ad: GADFullScreenPresentingAd) {
+    print("Ad did dismiss full screen content.")
+  }
+}
+
+
+

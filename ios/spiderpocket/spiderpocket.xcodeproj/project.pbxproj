@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		067F68CFCF8E9E7890161F1E /* Pods_spiderpocket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A7F51CCB13872E285E97C14B /* Pods_spiderpocket.framework */; };
 		833C10A42A2B2828001432A0 /* spiderpocketApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 833C10A32A2B2828001432A0 /* spiderpocketApp.swift */; };
 		833C10A62A2B2828001432A0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 833C10A52A2B2828001432A0 /* ContentView.swift */; };
 		833C10A82A2B2829001432A0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 833C10A72A2B2829001432A0 /* Assets.xcassets */; };
@@ -17,9 +18,11 @@
 		833C11752A2B2CA0001432A0 /* style in Resources */ = {isa = PBXBuildFile; fileRef = 833C11712A2B2CA0001432A0 /* style */; };
 		833C11762A2B2CA0001432A0 /* script in Resources */ = {isa = PBXBuildFile; fileRef = 833C11722A2B2CA0001432A0 /* script */; };
 		833C11782A2B3134001432A0 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 833C11772A2B3134001432A0 /* fonts */; };
+		83BF34002AAC3B6F0037071A /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 83BF33FF2AAC3B6F0037071A /* GoogleMobileAds */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		2F13004223E6C72296D47997 /* Pods-spiderpocket.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-spiderpocket.release.xcconfig"; path = "Target Support Files/Pods-spiderpocket/Pods-spiderpocket.release.xcconfig"; sourceTree = "<group>"; };
 		833C10A02A2B2828001432A0 /* spiderpocket.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = spiderpocket.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		833C10A32A2B2828001432A0 /* spiderpocketApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = spiderpocketApp.swift; sourceTree = "<group>"; };
 		833C10A52A2B2828001432A0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -31,6 +34,9 @@
 		833C11712A2B2CA0001432A0 /* style */ = {isa = PBXFileReference; lastKnownFileType = folder; path = style; sourceTree = "<group>"; };
 		833C11722A2B2CA0001432A0 /* script */ = {isa = PBXFileReference; lastKnownFileType = folder; path = script; sourceTree = "<group>"; };
 		833C11772A2B3134001432A0 /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = fonts; sourceTree = "<group>"; };
+		83BF34012AAC3CE70037071A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		9F683EF1F5D93BC180B4837F /* Pods-spiderpocket.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-spiderpocket.debug.xcconfig"; path = "Target Support Files/Pods-spiderpocket/Pods-spiderpocket.debug.xcconfig"; sourceTree = "<group>"; };
+		A7F51CCB13872E285E97C14B /* Pods_spiderpocket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_spiderpocket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,18 +44,32 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				83BF34002AAC3B6F0037071A /* GoogleMobileAds in Frameworks */,
+				067F68CFCF8E9E7890161F1E /* Pods_spiderpocket.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3DA493BFBF8D74867967CDE2 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				9F683EF1F5D93BC180B4837F /* Pods-spiderpocket.debug.xcconfig */,
+				2F13004223E6C72296D47997 /* Pods-spiderpocket.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		833C10972A2B2827001432A0 = {
 			isa = PBXGroup;
 			children = (
 				833C10B42A2B29D0001432A0 /* www */,
 				833C10A22A2B2828001432A0 /* spiderpocket */,
 				833C10A12A2B2828001432A0 /* Products */,
+				3DA493BFBF8D74867967CDE2 /* Pods */,
+				D635E2309CA4EA71AF539EFD /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -64,6 +84,7 @@
 		833C10A22A2B2828001432A0 /* spiderpocket */ = {
 			isa = PBXGroup;
 			children = (
+				83BF34012AAC3CE70037071A /* Info.plist */,
 				833C10A32A2B2828001432A0 /* spiderpocketApp.swift */,
 				833C10A52A2B2828001432A0 /* ContentView.swift */,
 				833C10A72A2B2829001432A0 /* Assets.xcassets */,
@@ -93,6 +114,14 @@
 			path = www;
 			sourceTree = "<group>";
 		};
+		D635E2309CA4EA71AF539EFD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A7F51CCB13872E285E97C14B /* Pods_spiderpocket.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -100,15 +129,20 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 833C10AE2A2B2829001432A0 /* Build configuration list for PBXNativeTarget "spiderpocket" */;
 			buildPhases = (
+				DF8F58F1BB84E5A96B53B430 /* [CP] Check Pods Manifest.lock */,
 				833C109C2A2B2828001432A0 /* Sources */,
 				833C109D2A2B2828001432A0 /* Frameworks */,
 				833C109E2A2B2828001432A0 /* Resources */,
+				41EDFC6A2D6106280593FF86 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = spiderpocket;
+			packageProductDependencies = (
+				83BF33FF2AAC3B6F0037071A /* GoogleMobileAds */,
+			);
 			productName = spiderpocket;
 			productReference = 833C10A02A2B2828001432A0 /* spiderpocket.app */;
 			productType = "com.apple.product-type.application";
@@ -137,6 +171,9 @@
 				Base,
 			);
 			mainGroup = 833C10972A2B2827001432A0;
+			packageReferences = (
+				83BF33FE2AAC3B6F0037071A /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads.git" */,
+			);
 			productRefGroup = 833C10A12A2B2828001432A0 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -163,6 +200,48 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		41EDFC6A2D6106280593FF86 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-spiderpocket/Pods-spiderpocket-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-spiderpocket/Pods-spiderpocket-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-spiderpocket/Pods-spiderpocket-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		DF8F58F1BB84E5A96B53B430 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-spiderpocket-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		833C109C2A2B2828001432A0 /* Sources */ = {
@@ -293,6 +372,7 @@
 		};
 		833C10AF2A2B2829001432A0 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9F683EF1F5D93BC180B4837F /* Pods-spiderpocket.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -302,6 +382,7 @@
 				DEVELOPMENT_TEAM = 7EDV5GHJYS;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = spiderpocket/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -326,6 +407,7 @@
 		};
 		833C10B02A2B2829001432A0 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2F13004223E6C72296D47997 /* Pods-spiderpocket.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -335,6 +417,7 @@
 				DEVELOPMENT_TEAM = 7EDV5GHJYS;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = spiderpocket/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -379,6 +462,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		83BF33FE2AAC3B6F0037071A /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads.git" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 10.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		83BF33FF2AAC3B6F0037071A /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 83BF33FE2AAC3B6F0037071A /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads.git" */;
+			productName = GoogleMobileAds;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 833C10982A2B2827001432A0 /* Project object */;
 }
