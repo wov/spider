@@ -850,6 +850,9 @@ class UIUpdater extends Observer {
         if(endPanelDom){
           endPanelDom.classList.add('appear');
         }
+          
+        // 胜利后让用户评价App
+        previewApp();
       }
 
     }
@@ -1183,6 +1186,7 @@ function renderCard(card) {
   const cardElement = document.createElement("div");
   cardElement.innerHTML = `
       <div class="card ${card.isFaceUp ? 'face-up' : 'face-down'}" data-id="${card.id}" data-value="${card.rank}" data-suit="${card.suit}">
+        <div class="back"></div>
         <div class="front">
           <div class="value">
             <img src="./svg/${card.rank}_${color}.svg"></img>
@@ -1194,7 +1198,6 @@ function renderCard(card) {
             <img src="./svg/${card.suit}_${card.rank}_content.svg" />
           </div>
         </div>
-        <div class="back"></div>
       </div>
     `;
 
@@ -1253,6 +1256,7 @@ function renderCards(gameState) {
         console.error("Card element not found:", card);
         return;
       }
+        
 
       cardElement.style.left = `${columnIndex * 10}vw`;
       cardElement.style.top = `${cardIndex * cardGap + 0.5}vw`;
@@ -1583,6 +1587,11 @@ function restartGame(){
 //      localStorage.removeItem("gameState");
 //      location.reload();
 //    }
+}
+
+
+function previewApp(){
+    window.webkit.messageHandlers.previewApp.postMessage(null);
 }
 
 function reloadGame(){

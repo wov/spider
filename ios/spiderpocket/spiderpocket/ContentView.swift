@@ -1,29 +1,64 @@
 import SwiftUI
 import WebKit
 
-import UIKit
-import GoogleMobileAds
+import StoreKit
 
+
+import GoogleMobileAds
+//  https://github.com/GaneshRajuGalla/SwiftUIAdMob/blob/main/AdMob/GoogleAds/Interstitial/InterstitialAdView.swift
+//https://developers.google.com/admob/ios/swiftui
 
 struct ContentView: View {
+
+    // Properties
+    var adViewControllerRepresentable = AdViewControllerRepresentable()
+    var adCoordinator = AdCoordinator()
+    @Environment(\.requestReview) var requestReview
+
+
     var body: some View {
             ZStack {
                 Color(red: 105/255, green: 174/255, blue: 107/255)
                     .edgesIgnoringSafeArea(.all)
 
-                WebView()
+                WebView(adCoordinator: adCoordinator, adViewControllerRepresentable: adViewControllerRepresentable, requestAppReview: requestAppReview)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 //                    .edgesIgnoringSafeArea(.all) // 忽略安全区域的边缘
+                    .background {
+                        // Add the adViewControllerRepresentable to the background so it
+                        // doesn't influence the placement of other views in the view hierarchy.
+                        adViewControllerRepresentable
+                          .frame(width: .zero, height: .zero)
+                    }
+            }.onAppear{
+                adCoordinator.loadAd()
+
             }
-        }
+        
+    }
+    
+    // Function to request a review
+      func requestAppReview() {
+          if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+              SKStoreReviewController.requestReview(in: windowScene)
+          }
+      }
 }
 
 struct WebView: UIViewRepresentable {
-    
     private var webView: WKWebView?
+    
+    var adCoordinator: AdCoordinator // Add this property
+    var adViewControllerRepresentable: AdViewControllerRepresentable // Add this property
+    var requestAppReview: () -> Void // Add this property
 
-    
-    
+
+    init(adCoordinator: AdCoordinator, adViewControllerRepresentable: AdViewControllerRepresentable, requestAppReview: @escaping () -> Void) {
+        self.adCoordinator = adCoordinator
+        self.adViewControllerRepresentable = adViewControllerRepresentable
+        self.requestAppReview = requestAppReview
+    }
+
     func makeUIView(context: Context) -> WKWebView {
         let configuration = configureWebView()
         let webView = WKWebView(frame: .zero, configuration: configuration)
@@ -31,7 +66,8 @@ struct WebView: UIViewRepresentable {
         webView.backgroundColor = .clear // 设置背景为透明色
 
         webView.navigationDelegate = context.coordinator // 设置导航代理
-        context.coordinator.webView = webView // 将 WKWebView 实例存储到协调器中
+//        context.coordinator.requestReview = requestReview // Pass requestReview
+//        context.coordinator.webView = webView // 将 WKWebView 实例存储到协调器中
 
         
         if let url = Bundle.main.url(forResource: "index", withExtension: "html") {
@@ -61,12 +97,25 @@ struct WebView: UIViewRepresentable {
     }
     
     func makeCoordinator() -> Coordinator {
-        Coordinator()
+        Coordinator(adCoordinator: adCoordinator, adViewControllerRepresentable: adViewControllerRepresentable, requestAppReview: requestAppReview)
     }
 
-    
     class Coordinator: NSObject, WKUIDelegate, WKNavigationDelegate, WKScriptMessageHandler {
         var webView: WKWebView? // 将 WKWebView 声明为可选类型
+        
+        var adCoordinator: AdCoordinator // Add this property
+        var adViewControllerRepresentable: AdViewControllerRepresentable // Add this property
+        var requestAppReview: () -> Void
+
+ 
+
+        init(adCoordinator: AdCoordinator, adViewControllerRepresentable: AdViewControllerRepresentable, requestAppReview: @escaping () -> Void) {
+            self.adCoordinator = adCoordinator
+            self.adViewControllerRepresentable = adViewControllerRepresentable
+            self.requestAppReview = requestAppReview
+            super.init()
+        }
+
 
         // 处理 JavaScript 弹框
         func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
@@ -106,6 +155,9 @@ struct WebView: UIViewRepresentable {
             } else if message.name == "restartGame" {
                 print("start a new game????")
                 restartGame()
+            } else if message.name == "reviweApp" {
+                // 让用户评价app。
+                requestAppReview()
             }
         }
         
@@ -123,6 +175,8 @@ struct WebView: UIViewRepresentable {
         
         // 重新开始游戏
         func restartGame() {
+            adCoordinator.loadAd()
+
             guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                   let rootViewController = windowScene.windows.first?.rootViewController else {
                 return
@@ -133,6 +187,9 @@ struct WebView: UIViewRepresentable {
             alertController.addAction(UIAlertAction(title: "Restart", style: .destructive) { _ in
                 // 用户确认重启游戏
                 self.performRestart()
+                
+                self.adCoordinator.presentAd(from: self.adViewControllerRepresentable.viewController)
+
             })
 
             rootViewController.present(alertController, animated: true, completion: nil)
@@ -157,41 +214,68 @@ struct WebView: UIViewRepresentable {
 }
 
 
-class ViewController: UIViewController, GADFullScreenContentDelegate {
+class AdCoordinator: NSObject {
+  private var ad: GADInterstitialAd?
 
-  private var interstitial: GADInterstitialAd?
+  func loadAd() {
+    GADInterstitialAd.load(
+        //模拟环境
+        withAdUnitID: "ca-app-pub-3940256099942544/4411468910", request: GADRequest()
 
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    let request = GADRequest()
-    GADInterstitialAd.load(withAdUnitID: "ca-app-pub-3871661481025389/6424030517",
-                                request: request,
-                      completionHandler: { [self] ad, error in
-                        if let error = error {
-                          print("Failed to load interstitial ad with error: \(error.localizedDescription)")
-                          return
-                        }
-                        interstitial = ad
-                        interstitial?.fullScreenContentDelegate = self
-                      }
-    )
+        // 真实环境
+//      withAdUnitID: "ca-app-pub-3871661481025389/6424030517", request: GADRequest()
+    ) { ad, error in
+      if let error = error {
+        return print("Failed to load ad with error: \(error.localizedDescription)")
+      }
+      self.ad = ad
+    }
   }
 
-  /// Tells the delegate that the ad failed to present full screen content.
-  func ad(_ ad: GADFullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
-    print("Ad did fail to present full screen content.")
-  }
+  func presentAd(from viewController: UIViewController) {
+    guard let fullScreenAd = ad else {
+      return print("Ad wasn't ready")
+    }
 
-  /// Tells the delegate that the ad will present full screen content.
-  func adWillPresentFullScreenContent(_ ad: GADFullScreenPresentingAd) {
-    print("Ad will present full screen content.")
+    fullScreenAd.present(fromRootViewController: viewController)
   }
+    
+    func adDidRecordImpression(_ ad: GADFullScreenPresentingAd) {
+        print("\(#function) called")
+      }
 
-  /// Tells the delegate that the ad dismissed full screen content.
-  func adDidDismissFullScreenContent(_ ad: GADFullScreenPresentingAd) {
-    print("Ad did dismiss full screen content.")
-  }
+      func adDidRecordClick(_ ad: GADFullScreenPresentingAd) {
+        print("\(#function) called")
+      }
+
+      func ad(_ ad: GADFullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
+        print("\(#function) called")
+      }
+
+      func adWillPresentFullScreenContent(_ ad: GADFullScreenPresentingAd) {
+        print("\(#function) called")
+      }
+
+
+      func adWillDismissFullScreenContent(_ ad: GADFullScreenPresentingAd) {
+        print("\(#function) called")
+      }
+
+      func adDidDismissFullScreenContent(_ ad: GADFullScreenPresentingAd) {
+        print("\(#function) called")
+      }
+
 }
 
 
+struct AdViewControllerRepresentable: UIViewControllerRepresentable {
+  let viewController = UIViewController()
 
+  func makeUIViewController(context: Context) -> some UIViewController {
+    return viewController
+  }
+
+  func updateUIViewController(_ uiViewController: UIViewControllerType, context: Context) {
+    // No implementation needed. Nothing to update.
+  }
+}
