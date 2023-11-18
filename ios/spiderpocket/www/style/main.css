@@ -4,6 +4,15 @@
     --pure-black : #000;
     --pure-red: #f00;
     --card-bg: #fff;
+    
+    --main-bg-dark : #121212;
+    --mainfont-dark-color: rgba(255,255,255,0.87);
+    --secondfont-dark-color: rgba(255,255,255,0.6);
+    --03dp-bgcolor: rgba(255,255,255,0.08);
+    
+    --card-bg-dark: #eee;
+
+    
 }
 
 
@@ -91,7 +100,6 @@ css-doodle {
 }
 
 
-/* TODO: 这里需要改掉绝对尺寸 */
 .card{
     display: inline-block;
     margin: 0 2px;
@@ -103,7 +111,6 @@ css-doodle {
     position: absolute;
 
     transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-    transition-delay: 0.1s;
 
     pointer-events: none;
     box-sizing: border-box;
@@ -251,7 +258,6 @@ div.card.face-down div.front{
 
 #touchControlContainer .touchControlColumn.selectable{
     background-image: linear-gradient(180deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.30) 99%);
-    /* box-shadow: inset 0 20px 20px 0 rgba(247,247,247,0.59); */
 }
 
 #touchControlContainer .touchControlColumn.movable-to{
@@ -615,3 +621,49 @@ div.card.face-down div.front{
     50% { transform: scale(5); } /* 中间状态，放大1.5倍 */
   }
   
+/*dark mode*/
+@media (prefers-color-scheme: dark)  {
+    html{
+        background-color: var(--main-bg-dark);
+        color: var(--mainfont-dark-color);
+    }
+    
+    .game-btns{
+        background-color: var(--main-bg-dark);
+    }
+    
+    .panel,
+    .panel .inner{
+        background: #222;
+    }
+    
+    .deal-cards-btn{
+        color: var(--mainfont-dark-color);
+    }
+    
+    .panel p{
+        color: var(--secondfont-dark-color);
+    }
+    
+    .suitplaceholderContainer .icon img{
+        filter: brightness(0) invert(1);
+    }
+    
+    .suitplaceholderContainer .suitplaceholder.active .icon img{
+       filter: drop-shadow(0 0  2px  rgb(255, 255, 255));
+    }
+    
+    .card .front{
+        background-color: var(--card-bg-dark);
+    }
+    
+    .card .back{
+        filter: grayscale(100%) brightness(60%);
+    }
+    
+    #touchControlContainer .touchControlColumn.selectable{
+        background-image: linear-gradient(180deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.10) 99%);
+    }
+    
+    
+}

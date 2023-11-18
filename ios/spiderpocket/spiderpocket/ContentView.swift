@@ -14,13 +14,18 @@ struct ContentView: View {
     var adViewControllerRepresentable = AdViewControllerRepresentable()
     var adCoordinator = AdCoordinator()
     @Environment(\.requestReview) var requestReview
-
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
             ZStack {
-                Color(red: 105/255, green: 174/255, blue: 107/255)
-                    .edgesIgnoringSafeArea(.all)
-
+                if colorScheme == .dark {
+                    Color(red: 12/255, green: 12/255, blue: 12/255)
+                        .edgesIgnoringSafeArea(.all)
+                } else {
+                    Color(red: 105/255, green: 174/255, blue: 107/255)
+                        .edgesIgnoringSafeArea(.all)
+                }
+                
                 WebView(adCoordinator: adCoordinator, adViewControllerRepresentable: adViewControllerRepresentable, requestAppReview: requestAppReview)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 //                    .edgesIgnoringSafeArea(.all) // 忽略安全区域的边缘
@@ -80,6 +85,8 @@ struct WebView: UIViewRepresentable {
         // 注册消息处理器
         webView.configuration.userContentController.add(context.coordinator, name: "messageHandler")
         webView.configuration.userContentController.add(context.coordinator, name: "restartGame") // 添加 restartGame 的消息处理器
+        webView.configuration.userContentController.add(context.coordinator, name: "reviewApp") // 添加 reviewApp 的消息处理器
+
         
         context.coordinator.webView = webView // 将 WKWebView 实例存储到协调器中
         return webView
@@ -155,8 +162,9 @@ struct WebView: UIViewRepresentable {
             } else if message.name == "restartGame" {
                 print("start a new game????")
                 restartGame()
-            } else if message.name == "reviweApp" {
+            } else if message.name == "reviewApp" {
                 // 让用户评价app。
+                print("review app")
                 requestAppReview()
             }
         }
@@ -220,10 +228,10 @@ class AdCoordinator: NSObject {
   func loadAd() {
     GADInterstitialAd.load(
         //模拟环境
-        withAdUnitID: "ca-app-pub-3940256099942544/4411468910", request: GADRequest()
+//        withAdUnitID: "ca-app-pub-3940256099942544/4411468910", request: GADRequest()
 
         // 真实环境
-//      withAdUnitID: "ca-app-pub-3871661481025389/6424030517", request: GADRequest()
+      withAdUnitID: "ca-app-pub-3871661481025389/6424030517", request: GADRequest()
     ) { ad, error in
       if let error = error {
         return print("Failed to load ad with error: \(error.localizedDescription)")

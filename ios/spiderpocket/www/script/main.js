@@ -88,6 +88,8 @@ const giveUpButton = document.getElementById("give-up");
 
 const restartGameButton = document.getElementById("restart-game");
 
+//const reviewAppButton = document.getElementById("reviewApp");
+
 restartGameButton.addEventListener("click",reloadGame);
 giveUpButton.addEventListener("click",restartGame);
 dealCardsButton.addEventListener("click", dealCardsToTableau);
@@ -101,6 +103,8 @@ rightButton.addEventListener("click", () => moveCursorHorizontal('right'));
 
 confirmMoveButton.addEventListener("click", confirmMove);
 cancelMoveButton.addEventListener("click", cancelMove);
+
+//reviewAppButton.addEventListener("click",reviewApp);
 
 const initializeAppButton = document.getElementById("initializeApp");
 initializeAppButton.addEventListener("click", initApp, { once: true });
@@ -852,7 +856,7 @@ class UIUpdater extends Observer {
         }
           
         // 胜利后让用户评价App
-        previewApp();
+          reviewApp();
       }
 
     }
@@ -1579,19 +1583,12 @@ function countPossibleSuitSequences(tableau) {
 }
 
 function restartGame(){
-//    window.webkit.messageHandlers.messageHandler.postMessage("showAlert");
     window.webkit.messageHandlers.restartGame.postMessage(null);
-
-//    const r = confirm('Are you sure you want to restart the game?')
-//    if(r){
-//      localStorage.removeItem("gameState");
-//      location.reload();
-//    }
 }
 
 
-function previewApp(){
-    window.webkit.messageHandlers.previewApp.postMessage(null);
+function reviewApp(){
+    window.webkit.messageHandlers.reviewApp.postMessage(null);
 }
 
 function reloadGame(){
